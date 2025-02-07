@@ -33,24 +33,6 @@
             margin-right: 10px;
             color: #3498db;
         }
-        .card {
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: scale(1.02);
-        }
-        .card-header {
-            background-color: #3498db;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
         .fadeIn {
             animation: fadeIn 1s ease-in-out;
         }
@@ -71,10 +53,22 @@
         <div class="card-body">
             <label>Income (THB):</label>
             <input type="number" id="income" class="form-control mb-2" value="34000">
-            <label>Total Expenses (THB):</label>
-            <input type="number" id="expenses" class="form-control mb-2" value="25210">
-            <label>Target Savings (THB):</label>
-            <input type="number" id="targetSavings" class="form-control mb-2" value="1700">
+
+            <label>Rent (THB):</label>
+            <input type="number" id="rent" class="form-control mb-2" value="8000">
+            <label>Car Payment (THB):</label>
+            <input type="number" id="car" class="form-control mb-2" value="9980">
+            <label>Internet (THB):</label>
+            <input type="number" id="internet" class="form-control mb-2" value="1000">
+            <label>Car Insurance (THB):</label>
+            <input type="number" id="insurance" class="form-control mb-2" value="1730">
+            <label>Other Expenses (THB):</label>
+            <input type="number" id="other" class="form-control mb-2" value="1000">
+            <label>Savings (THB):</label>
+            <input type="number" id="savings" class="form-control mb-2" value="1000">
+            <label>Fuel (THB):</label>
+            <input type="number" id="fuel" class="form-control mb-2" value="1500">
+
             <button class="btn btn-primary w-100" onclick="calculateBudget()">Calculate</button>
         </div>
     </div>
@@ -84,29 +78,21 @@
         <div class="card">
             <div class="card-header"><i class="fas fa-balance-scale"></i> Remaining Balance</div>
             <div class="card-body text-center">
-                <p class="highlight" id="remainingBalance">8,790 THB</p>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header"><i class="fas fa-piggy-bank"></i> Recommended Savings</div>
-            <div class="card-body text-center">
-                <p class="highlight" id="suggestedSavings">1,700 THB</p>
+                <p class="highlight" id="remainingBalance">- THB</p>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header"><i class="fas fa-coins"></i> Money Available for Spending</div>
             <div class="card-body text-center">
-                <p class="highlight" id="spendingMoney">7,090 THB</p>
+                <p class="highlight" id="spendingMoney">- THB</p>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header"><i class="fas fa-calendar-day"></i> Daily Spending Limit</div>
             <div class="card-body text-center">
-                <p class="highlight" id="dailyLimit">236.33 THB</p>
-                <p class="text-note">*This may not be enough for daily food expenses.</p>
+                <p class="highlight" id="dailyLimit">- THB</p>
             </div>
         </div>
     </div>
@@ -118,34 +104,40 @@
 <script>
 // โหลดข้อมูลที่บันทึกไว้
 window.onload = function() {
-    if (localStorage.getItem("income")) {
-        document.getElementById('income').value = localStorage.getItem("income");
-        document.getElementById('expenses').value = localStorage.getItem("expenses");
-        document.getElementById('targetSavings').value = localStorage.getItem("targetSavings");
-        calculateBudget();
-    }
+    let keys = ["income", "rent", "car", "internet", "insurance", "other", "savings", "fuel"];
+    keys.forEach(key => {
+        if (localStorage.getItem(key)) {
+            document.getElementById(key).value = localStorage.getItem(key);
+        }
+    });
+    calculateBudget();
 }
 
 // ฟังก์ชันคำนวณและบันทึกข้อมูลลง LocalStorage
 function calculateBudget() {
     let income = parseFloat(document.getElementById('income').value);
-    let expenses = parseFloat(document.getElementById('expenses').value);
-    let targetSavings = parseFloat(document.getElementById('targetSavings').value);
+    let rent = parseFloat(document.getElementById('rent').value);
+    let car = parseFloat(document.getElementById('car').value);
+    let internet = parseFloat(document.getElementById('internet').value);
+    let insurance = parseFloat(document.getElementById('insurance').value);
+    let other = parseFloat(document.getElementById('other').value);
+    let savings = parseFloat(document.getElementById('savings').value);
+    let fuel = parseFloat(document.getElementById('fuel').value);
 
-    let remainingBalance = income - expenses;
-    let suggestedSavings = income * 0.05;
-    let spendingMoney = remainingBalance - targetSavings;
+    let totalExpenses = rent + car + internet + insurance + other + fuel;
+    let remainingBalance = income - totalExpenses;
+    let spendingMoney = remainingBalance - savings;
     let dailyLimit = spendingMoney / 30;
 
     document.getElementById('remainingBalance').innerHTML = remainingBalance.toFixed(2) + " THB";
-    document.getElementById('suggestedSavings').innerHTML = suggestedSavings.toFixed(2) + " THB";
     document.getElementById('spendingMoney').innerHTML = spendingMoney.toFixed(2) + " THB";
     document.getElementById('dailyLimit').innerHTML = dailyLimit.toFixed(2) + " THB";
 
     // บันทึกข้อมูลลง LocalStorage
-    localStorage.setItem("income", income);
-    localStorage.setItem("expenses", expenses);
-    localStorage.setItem("targetSavings", targetSavings);
+    let keys = {income, rent, car, internet, insurance, other, savings, fuel};
+    for (let key in keys) {
+        localStorage.setItem(key, keys[key]);
+    }
 }
 </script>
 
