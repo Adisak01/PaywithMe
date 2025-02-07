@@ -31,6 +31,10 @@
             color: red;
             cursor: pointer;
         }
+        .edit-btn {
+            color: blue;
+            cursor: pointer;
+        }
         .fadeIn {
             animation: fadeIn 1s ease-in-out;
         }
@@ -63,19 +67,6 @@
         </div>
     </div>
 
-    <!-- Input for Purchase Plan -->
-    <div class="card mt-3">
-        <div class="card-body">
-            <label><i class="fas fa-shopping-cart"></i> What do you want to buy?</label>
-            <input type="text" id="purchaseItem" class="form-control mb-2" placeholder="Item name">
-
-            <label><i class="fas fa-calendar-check"></i> Months to Save:</label>
-            <input type="number" id="monthsToSave" class="form-control mb-2" placeholder="Months">
-
-            <button class="btn btn-warning w-100 mt-2" onclick="calculatePurchasePlan()"><i class="fas fa-calculator"></i> Calculate Monthly Saving</button>
-        </div>
-    </div>
-
     <!-- Output Section -->
     <div id="results" class="fadeIn">
         <div class="card mt-3">
@@ -86,14 +77,6 @@
                 <p><strong>Money Spent Today:</strong> <span id="dailySpent" class="highlight">-</span> THB</p>
                 <p><strong>Status:</strong> <span id="status" class="status-warning">-</span></p>
             </div>
-        </div>
-    </div>
-
-    <!-- Canvas for Graphs -->
-    <div class="card mt-3">
-        <div class="card-header"><i class="fas fa-chart-bar"></i> Spending Overview</div>
-        <div class="card-body">
-            <canvas id="expenseChart"></canvas>
         </div>
     </div>
 
@@ -132,7 +115,7 @@
 
 <script>
 // Initialize an empty array to store expenses
-let expensesList = [];
+let expensesList = JSON.parse(localStorage.getItem("expensesList")) || [];
 
 // Function to add expense
 function addExpense() {
@@ -141,6 +124,7 @@ function addExpense() {
 
     if (expenseName && expenseAmount > 0) {
         expensesList.push({ name: expenseName, amount: expenseAmount });
+        localStorage.setItem("expensesList", JSON.stringify(expensesList));
         updateExpenseList();
         calculateTotalExpenses();
         calculateBudget();
@@ -159,9 +143,30 @@ function updateExpenseList() {
         const li = document.createElement("li");
         li.className = "list-group-item d-flex justify-content-between align-items-center";
         li.innerHTML = `${expense.name}: ${expense.amount.toFixed(2)} THB 
+            <span class="edit-btn" onclick="editExpense(${index})"><i class="fas fa-edit"></i></span>
             <span class="delete-btn" onclick="deleteExpense(${index})"><i class="fas fa-trash-alt"></i></span>`;
         expenseListElement.appendChild(li);
     });
+}
+
+// Function to edit an expense
+function editExpense(index) {
+    const expense = expensesList[index];
+    document.getElementById("expenseName").value = expense.name;
+    document.getElementById("expenseAmount").value = expense.amount;
+    expensesList.splice(index, 1); // Remove the expense from the list before editing
+    localStorage.setItem("expensesList", JSON.stringify(expensesList));
+    updateExpenseList(); // Update the list
+    $('#expenseModal').modal('show'); // Show modal to edit
+}
+
+// Function to delete an expense
+function deleteExpense(index) {
+    expensesList.splice(index, 1);
+    localStorage.setItem("expensesList", JSON.stringify(expensesList));
+    updateExpenseList();
+    calculateTotalExpenses();
+    calculateBudget();
 }
 
 // Function to calculate the total expenses
@@ -182,9 +187,8 @@ function calculateBudget() {
     document.getElementById('dailyLimit').innerHTML = dailyLimit.toFixed(2);
 }
 
-// Function to delete an expense
-function deleteExpense(index) {
-    expensesList.splice(index, 1);
+// Load data and initialize
+window.onload = function() {
     updateExpenseList();
     calculateTotalExpenses();
     calculateBudget();
