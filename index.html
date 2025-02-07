@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Budget Overview with Daily Spending</title>
+    <title>Budget Overview with Expenses Management</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
@@ -51,22 +51,10 @@
 <body>
 
 <div class="container">
-    <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget with Daily Spending</h2>
+    <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget with Expenses Management</h2>
 
-    <!-- Input Form -->
-    <div class="card">
-        <div class="card-body">
-            <label><i class="fas fa-money-bill-wave"></i> Income (THB):</label>
-            <input type="number" id="income" class="form-control mb-2" value="34000">
-
-            <label><i class="fas fa-receipt"></i> Total Expenses (THB):</label>
-            <input type="number" id="expenses" class="form-control mb-2" value="0" readonly>
-
-            <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#expenseModal"><i class="fas fa-plus"></i> Add Expense</button>
-            <button class="btn btn-primary w-100 mt-2" onclick="calculateBudget()"><i class="fas fa-calculator"></i> Calculate</button>
-            <button class="btn btn-info w-100 mt-2" data-bs-toggle="modal" data-bs-target="#dailyExpenseModal"><i class="fas fa-calendar-day"></i> Add Daily Expense</button>
-        </div>
-    </div>
+    <!-- Button to View Monthly Expenses -->
+    <button class="btn btn-info w-100 mt-3" data-bs-toggle="modal" data-bs-target="#expenseListModal"><i class="fas fa-list"></i> View Monthly Expenses</button>
 
     <!-- Output Section -->
     <div id="results">
@@ -81,215 +69,137 @@
         </div>
     </div>
 
-    <!-- Daily Expense List -->
-    <div class="card mt-3">
-        <div class="card-header"><i class="fas fa-list"></i> Daily Spending History</div>
-        <div class="card-body">
-            <div class="daily-expense-list" id="dailyExpenseList"></div>
+    <!-- Modal for Monthly Expenses -->
+    <div class="modal fade" id="expenseListModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-list"></i> Monthly Expenses</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="expense-list" id="expenseList">
+                        <!-- Expense items will be displayed here -->
+                    </div>
+                    <button class="btn btn-success w-100 mt-3" onclick="showAddExpenseModal()">Add New Expense</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Chart -->
-    <div class="card mt-3">
-        <div class="card-header"><i class="fas fa-chart-line"></i> Daily Spending Chart</div>
-        <div class="card-body">
-            <canvas id="dailyChart"></canvas>
+    <!-- Modal for Adding/Editing Expense -->
+    <div class="modal fade" id="expenseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus"></i> Add/Edit Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label>Expense Name:</label>
+                    <input type="text" id="expenseName" class="form-control">
+                    <label>Amount (THB):</label>
+                    <input type="number" id="expenseAmount" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Modal for Adding Expense -->
-<div class="modal fade" id="expenseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-plus"></i> Add Expense</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <label>Expense Name:</label>
-                <input type="text" id="expenseName" class="form-control">
-                <label>Amount (THB):</label>
-                <input type="number" id="expenseAmount" class="form-control">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="addExpense()"><i class="fas fa-save"></i> Add</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for Adding Daily Expense -->
-<div class="modal fade" id="dailyExpenseModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-calendar-day"></i> Add Daily Expense</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <label>Expense Name:</label>
-                <input type="text" id="dailyExpenseName" class="form-control">
-                <label>Amount (THB):</label>
-                <input type="number" id="dailyExpenseAmount" class="form-control">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="addDailyExpense()"><i class="fas fa-save"></i> Add</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// Initialize data storage for expenses and daily expenses
+// Initialize data storage for monthly expenses
 let expensesList = JSON.parse(localStorage.getItem("expensesList")) || [];
-let dailyExpenses = JSON.parse(localStorage.getItem("dailyExpenses")) || [];
 
-// Add an expense
-function addExpense() {
+// Display the list of expenses in the modal
+function updateExpenseList() {
+    const expenseListElement = document.getElementById("expenseList");
+    expenseListElement.innerHTML = "";
+    expensesList.forEach((expense, index) => {
+        const div = document.createElement("div");
+        div.className = "d-flex justify-content-between align-items-center mb-2";
+        div.innerHTML = `
+            <span>${expense.name}: ${expense.amount.toFixed(2)} THB</span>
+            <button class="btn btn-warning btn-sm" onclick="editExpense(${index})"><i class="fas fa-edit"></i> Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteExpense(${index})"><i class="fas fa-trash-alt"></i> Delete</button>
+        `;
+        expenseListElement.appendChild(div);
+    });
+}
+
+// Open modal to add a new expense
+function showAddExpenseModal() {
+    document.getElementById("expenseName").value = "";
+    document.getElementById("expenseAmount").value = "";
+    $('#expenseModal').modal('show');
+}
+
+// Save new or edited expense
+function saveExpense() {
     const expenseName = document.getElementById("expenseName").value;
     const expenseAmount = parseFloat(document.getElementById("expenseAmount").value);
 
     if (expenseName && expenseAmount > 0) {
-        expensesList.push({ name: expenseName, amount: expenseAmount });
+        if (expensesList.length === 0 || !expensesList[expensesList.length - 1].editing) {
+            expensesList.push({ name: expenseName, amount: expenseAmount });
+        } else {
+            const index = expensesList.length - 1;
+            expensesList[index] = { name: expenseName, amount: expenseAmount, editing: false };
+        }
         localStorage.setItem("expensesList", JSON.stringify(expensesList));
         updateExpenseList();
-        calculateTotalExpenses();
-        calculateBudget();
         $('#expenseModal').modal('hide');
     } else {
         alert("Please enter a valid expense name and amount");
     }
 }
 
-// Update the expense list on the UI
-function updateExpenseList() {
-    const expenseListElement = document.getElementById("expenseList");
-    expenseListElement.innerHTML = "";
-    expensesList.forEach((expense, index) => {
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
-        li.innerHTML = `${expense.name}: ${expense.amount.toFixed(2)} THB 
-            <span class="edit-btn" onclick="editExpense(${index})"><i class="fas fa-edit"></i></span>
-            <span class="delete-btn" onclick="deleteExpense(${index})"><i class="fas fa-trash-alt"></i></span>`;
-        expenseListElement.appendChild(li);
-    });
+// Edit an existing expense
+function editExpense(index) {
+    const expense = expensesList[index];
+    document.getElementById("expenseName").value = expense.name;
+    document.getElementById("expenseAmount").value = expense.amount;
+    expensesList[index].editing = true;
+    $('#expenseModal').modal('show');
 }
 
-// Calculate total expenses
-function calculateTotalExpenses() {
-    const totalExpenses = expensesList.reduce((total, expense) => total + expense.amount, 0);
-    document.getElementById('expenses').value = totalExpenses.toFixed(2);
+// Delete an expense
+function deleteExpense(index) {
+    expensesList.splice(index, 1);
+    localStorage.setItem("expensesList", JSON.stringify(expensesList));
+    updateExpenseList();
 }
 
-// Calculate budget
-function calculateBudget() {
-    let income = parseFloat(document.getElementById('income').value);
-    let totalExpenses = parseFloat(document.getElementById('expenses').value);
-    let remainingBalance = income - totalExpenses;
-    let dailyLimit = remainingBalance / 30;
-
-    document.getElementById('remainingBalance').innerHTML = remainingBalance.toFixed(2);
-    document.getElementById('spendingMoney').innerHTML = remainingBalance.toFixed(2);
-    document.getElementById('dailyLimit').innerHTML = dailyLimit.toFixed(2);
-}
-
-// Add a daily expense
-function addDailyExpense() {
-    const dailyExpenseName = document.getElementById("dailyExpenseName").value;
-    const dailyExpenseAmount = parseFloat(document.getElementById("dailyExpenseAmount").value);
-
-    if (dailyExpenseName && dailyExpenseAmount > 0) {
-        let currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-        let dailyLimit = parseFloat(document.getElementById("dailyLimit").innerText);
-        let dailyStatus = dailyExpenseAmount <= dailyLimit ? "OK" : "Exceeds limit";
-
-        // Save daily expense
-        dailyExpenses.push({
-            date: currentDate,
-            name: dailyExpenseName,
-            amount: dailyExpenseAmount,
-            status: dailyStatus
-        });
-
-        localStorage.setItem("dailyExpenses", JSON.stringify(dailyExpenses));
-        updateDailyExpenseList();
-        calculateDailySpent();
-        $('#dailyExpenseModal').modal('hide');
-    } else {
-        alert("Please enter a valid daily expense name and amount");
-    }
-}
-
-// Update daily expenses list
-function updateDailyExpenseList() {
-    const dailyExpenseListElement = document.getElementById("dailyExpenseList");
-    dailyExpenseListElement.innerHTML = "";
-    dailyExpenses.forEach((expense) => {
-        const li = document.createElement("div");
-        li.className = "daily-expense-item list-group-item d-flex justify-content-between align-items-center";
-        li.innerHTML = `${expense.date} - ${expense.name}: ${expense.amount.toFixed(2)} THB 
-            <span class="badge bg-${expense.status === "Exceeds limit" ? "danger" : "success"}">${expense.status}</span>`;
-        li.onclick = function() { displayDailyExpenseDetails(expense); };
-        dailyExpenseListElement.appendChild(li);
-    });
-
-    updateChart();
-}
-
-// Display daily expense details
-function displayDailyExpenseDetails(expense) {
-    alert(`Date: ${expense.date}\nExpense: ${expense.name}\nAmount: ${expense.amount.toFixed(2)} THB\nStatus: ${expense.status}`);
-}
-
-// Calculate total money spent today
-function calculateDailySpent() {
-    const today = new Date().toISOString().split('T')[0];
-    let dailySpent = dailyExpenses.filter(exp => exp.date === today).reduce((total, exp) => total + exp.amount, 0);
-    document.getElementById("dailySpent").innerText = dailySpent.toFixed(2);
-}
-
-// Chart setup
-let dailyChart = new Chart(document.getElementById('dailyChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-        labels: [], // Date labels
-        datasets: [{
-            label: 'Daily Spending (THB)',
-            data: [], // Spending data
-            backgroundColor: 'rgba(0, 123, 255, 0.7)',
-            borderColor: 'rgba(0, 123, 255, 1)',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        scales: {
-            x: { title: { display: true, text: 'Date' } },
-            y: { title: { display: true, text: 'Spending (THB)' }, beginAtZero: true }
-        }
-    }
-});
-
-// Update the daily spending chart
-function updateChart() {
-    let dates = [...new Set(dailyExpenses.map(exp => exp.date))]; // Get unique dates
-    let spendingPerDay = dates.map(date => {
-        return dailyExpenses.filter(exp => exp.date === date).reduce((total, exp) => total + exp.amount, 0);
-    });
-
-    dailyChart.data.labels = dates;
-    dailyChart.data.datasets[0].data = spendingPerDay;
-    dailyChart.update();
-}
-
-// Initial setup
+// Initialize expense list
 updateExpenseList();
-updateDailyExpenseList();
-calculateBudget();
+
+// Data for budget calculation
+let monthlyIncome = 34000;
+let totalExpenses = 0;
+let dailySpendingLimit = 300;
+
+// Update total expenses, remaining balance, and spending money
+function updateBudgetCalculations() {
+    totalExpenses = expensesList.reduce((total, expense) => total + expense.amount, 0);
+    let remainingBalance = monthlyIncome - totalExpenses;
+    let spendingMoney = remainingBalance - (dailySpendingLimit * 30);
+
+    // Update DOM with calculations
+    document.getElementById("remainingBalance").innerText = remainingBalance.toFixed(2);
+    document.getElementById("spendingMoney").innerText = spendingMoney.toFixed(2);
+    document.getElementById("dailyLimit").innerText = dailySpendingLimit.toFixed(2);
+    document.getElementById("dailySpent").innerText = (totalExpenses / 30).toFixed(2);
+}
+
+// Call function to update budget calculations
+updateBudgetCalculations();
+
 </script>
 </body>
 </html>
