@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget Overview with Expenses Management</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -46,17 +42,34 @@
         .daily-expense-item {
             cursor: pointer;
         }
+        #dailyExpenseChart {
+            width: 100%;
+            height: 300px;
+        }
+        .current-date {
+            font-size: 1.2em;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2d3e50;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="current-date" id="currentDate"></div>
+
     <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget with Expenses Management</h2>
 
-    <!-- Button to View Monthly Expenses -->
+    <!-- View Daily Expenses Button -->
     <button class="btn btn-info w-100 mt-3" data-bs-toggle="modal" data-bs-target="#expenseListModal"><i class="fas fa-list"></i> View Monthly Expenses</button>
 
-    <!-- Output Section -->
+    <!-- Date Selector for Daily Expenses -->
+    <div class="mt-3">
+        <label for="expenseDate">Select Date:</label>
+        <input type="date" id="expenseDate" class="form-control" onchange="showDailyExpenses()">
+    </div>
+
     <div id="results">
         <div class="card mt-3">
             <div class="card-body">
@@ -65,6 +78,7 @@
                 <p><strong>Daily Spending Limit:</strong> <span id="dailyLimit" class="highlight">-</span> THB</p>
                 <p><strong>Money Spent Today:</strong> <span id="dailySpent" class="highlight">-</span> THB</p>
                 <p><strong>Status:</strong> <span id="status" class="status-warning">-</span></p>
+                <button class="btn btn-warning mt-3 w-100" onclick="addDailyExpense()">Add Daily Expense</button>
             </div>
         </div>
     </div>
@@ -78,46 +92,52 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="expense-list" id="expenseList">
-                        <!-- Expense items will be displayed here -->
-                    </div>
+                    <div class="expense-list" id="expenseList"></div>
                     <button class="btn btn-success w-100 mt-3" onclick="showAddExpenseModal()">Add New Expense</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal for Adding/Editing Expense -->
-    <div class="modal fade" id="expenseModal" tabindex="-1">
+    <!-- Modal for Adding Daily Expense -->
+    <div class="modal fade" id="dailyExpenseModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus"></i> Add/Edit Expense</h5>
+                    <h5 class="modal-title"><i class="fas fa-calendar-day"></i> Add Daily Expense</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <label>Expense Name:</label>
-                    <input type="text" id="expenseName" class="form-control">
+                    <input type="text" id="dailyExpenseName" class="form-control">
                     <label>Amount (THB):</label>
-                    <input type="number" id="expenseAmount" class="form-control">
+                    <input type="number" id="dailyExpenseAmount" class="form-control">
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+                    <button class="btn btn-primary" onclick="saveDailyExpense()">Save</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Daily Expense Chart -->
+    <div class="mt-4">
+        <canvas id="dailyExpenseChart"></canvas>
+    </div>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// Initialize data storage for monthly expenses
+// Data for monthly expenses and daily expenses
 let expensesList = JSON.parse(localStorage.getItem("expensesList")) || [];
+let dailyExpensesList = JSON.parse(localStorage.getItem("dailyExpensesList")) || [];
+let monthlyIncome = 34000;
+let totalExpenses = 0;
+let dailySpendingLimit = 300;
 
-// Display the list of expenses in the modal
+// Function to update the expense list
 function updateExpenseList() {
     const expenseListElement = document.getElementById("expenseList");
     expenseListElement.innerHTML = "";
@@ -146,12 +166,7 @@ function saveExpense() {
     const expenseAmount = parseFloat(document.getElementById("expenseAmount").value);
 
     if (expenseName && expenseAmount > 0) {
-        if (expensesList.length === 0 || !expensesList[expensesList.length - 1].editing) {
-            expensesList.push({ name: expenseName, amount: expenseAmount });
-        } else {
-            const index = expensesList.length - 1;
-            expensesList[index] = { name: expenseName, amount: expenseAmount, editing: false };
-        }
+        expensesList.push({ name: expenseName, amount: expenseAmount });
         localStorage.setItem("expensesList", JSON.stringify(expensesList));
         updateExpenseList();
         $('#expenseModal').modal('hide');
@@ -165,7 +180,6 @@ function editExpense(index) {
     const expense = expensesList[index];
     document.getElementById("expenseName").value = expense.name;
     document.getElementById("expenseAmount").value = expense.amount;
-    expensesList[index].editing = true;
     $('#expenseModal').modal('show');
 }
 
@@ -176,30 +190,73 @@ function deleteExpense(index) {
     updateExpenseList();
 }
 
-// Initialize expense list
-updateExpenseList();
-
-// Data for budget calculation
-let monthlyIncome = 34000;
-let totalExpenses = 0;
-let dailySpendingLimit = 300;
-
-// Update total expenses, remaining balance, and spending money
-function updateBudgetCalculations() {
-    totalExpenses = expensesList.reduce((total, expense) => total + expense.amount, 0);
-    let remainingBalance = monthlyIncome - totalExpenses;
-    let spendingMoney = remainingBalance - (dailySpendingLimit * 30);
-
-    // Update DOM with calculations
-    document.getElementById("remainingBalance").innerText = remainingBalance.toFixed(2);
-    document.getElementById("spendingMoney").innerText = spendingMoney.toFixed(2);
-    document.getElementById("dailyLimit").innerText = dailySpendingLimit.toFixed(2);
-    document.getElementById("dailySpent").innerText = (totalExpenses / 30).toFixed(2);
+// Function to add a daily expense
+function addDailyExpense() {
+    $('#dailyExpenseModal').modal('show');
 }
 
-// Call function to update budget calculations
-updateBudgetCalculations();
+// Save daily expense
+function saveDailyExpense() {
+    const dailyExpenseName = document.getElementById("dailyExpenseName").value;
+    const dailyExpenseAmount = parseFloat(document.getElementById("dailyExpenseAmount").value);
+    const selectedDate = document.getElementById("expenseDate").value || new Date().toISOString().split('T')[0];
 
+    if (dailyExpenseName && dailyExpenseAmount > 0) {
+        dailyExpensesList.push({ name: dailyExpenseName, amount: dailyExpenseAmount, date: selectedDate });
+        localStorage.setItem("dailyExpensesList", JSON.stringify(dailyExpensesList));
+        $('#dailyExpenseModal').modal('hide');
+        showDailyExpenses();
+    } else {
+        alert("Please enter a valid daily expense name and amount");
+    }
+}
+
+// Function to show daily expenses based on selected date
+function showDailyExpenses() {
+    const selectedDate = document.getElementById("expenseDate").value;
+    const dailyExpensesForSelectedDate = dailyExpensesList.filter(expense => expense.date === selectedDate);
+    
+    let totalDailySpent = 0;
+    const dailyExpenseListElement = document.getElementById("dailyExpenseList");
+    dailyExpenseListElement.innerHTML = "";
+    dailyExpensesForSelectedDate.forEach(expense => {
+        const div = document.createElement("div");
+        div.className = "daily-expense-item";
+        div.innerHTML = `${expense.name}: ${expense.amount.toFixed(2)} THB`;
+        dailyExpenseListElement.appendChild(div);
+        totalDailySpent += expense.amount;
+    });
+
+    document.getElementById("dailySpent").innerText = totalDailySpent.toFixed(2);
+    document.getElementById("status").innerText = totalDailySpent > dailySpendingLimit ? "Exceed Daily Limit" : "Within Daily Limit";
+    updateDailyExpenseChart(dailyExpensesForSelectedDate);
+}
+
+// Update daily expenses chart
+function updateDailyExpenseChart(dailyExpenses) {
+    const labels = dailyExpenses.map(expense => expense.name);
+    const data = dailyExpenses.map(expense => expense.amount);
+
+    const ctx = document.getElementById("dailyExpenseChart").getContext("2d");
+    const chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Daily Expenses (THB)",
+                data: data,
+                backgroundColor: "#FF6F61"
+            }]
+        }
+    });
+}
+
+// Initialize calculations on page load
+window.onload = () => {
+    updateBudgetCalculations();
+    showDailyExpenses();
+};
 </script>
+
 </body>
 </html>
