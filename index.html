@@ -62,11 +62,6 @@
             <input type="text" id="todayExpenseName" class="form-control" placeholder="Expense Name">
             <label for="todayExpenseAmount">Amount:</label>
             <input type="number" id="todayExpenseAmount" class="form-control" placeholder="Amount">
-            <label for="isOverLimit">Is it over budget?</label>
-            <select id="isOverLimit" class="form-control">
-              <option value="false">No</option>
-              <option value="true">Yes</option>
-            </select>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -96,6 +91,7 @@
     let monthlyExpenses = [];
     let dailyExpenses = [];
     let yearlyRemaining = 0;
+    let dailyBudget = 0;
 
     // Load data from localStorage
     window.onload = function() {
@@ -144,7 +140,9 @@
     document.getElementById('saveTodayExpense').addEventListener('click', function() {
       const todayExpenseName = document.getElementById('todayExpenseName').value;
       const todayExpenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
-      const isOverLimit = document.getElementById('isOverLimit').value === 'true';
+
+      // Check if expense exceeds the daily budget
+      const isOverLimit = todayExpenseAmount > dailyBudget;
 
       dailyExpenses.push({ name: todayExpenseName, amount: todayExpenseAmount, overLimit: isOverLimit });
       localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses)); // Save to localStorage
@@ -181,7 +179,8 @@
     function updateRemainingMoney(totalMonthlyExpense = 0) {
       const totalExpense = monthlyExpenses.reduce((acc, expense) => acc + expense.amount, 0);
       const remainingMoney = monthlyIncome - totalExpense;
-      const moneyPerDay = remainingMoney / 30; // Assuming 30 days in a month
+      dailyBudget = remainingMoney / 30; // Assuming 30 days in a month
+      const moneyPerDay = dailyBudget;
 
       document.getElementById('remainingMoney').textContent = remainingMoney.toFixed(2);
       document.getElementById('moneyPerDay').textContent = moneyPerDay.toFixed(2);
