@@ -26,7 +26,7 @@
         </div>
     </div>
 
-    <!-- Add Expense Modal -->
+    <!-- Display Monthly Expenses -->
     <div class="card">
         <div class="card-body">
             <h5>Monthly Expenses</h5>
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <!-- Daily Budget -->
+    <!-- Display Daily Budget -->
     <div class="card">
         <div class="card-body">
             <h5>Daily Budget: <span id="dailyBudget">0</span> THB</h5>
@@ -209,4 +209,44 @@
 
     // Daily Expenses Logic
     $('#saveDailyExpense').click(function () {
-        const expense
+        const expenseName = $('#dailyExpenseName').val();
+        const expenseAmount = parseInt($('#dailyExpenseAmount').val());
+        if (expenseName && expenseAmount) {
+            dailyExpenses.push({ name: expenseName, amount: expenseAmount });
+            localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses));
+            updateDailyExpenseChart();
+            $('#dailyExpenseModal').modal('hide');
+        }
+    });
+
+    function updateDailyExpenseChart() {
+        const dailyExpenseData = dailyExpenses.map(expense => expense.amount);
+        const dailyExpenseLabels = dailyExpenses.map(expense => expense.name);
+        
+        const ctx = document.getElementById('expensesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dailyExpenseLabels,
+                datasets: [{
+                    label: 'Daily Expenses',
+                    data: dailyExpenseData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
