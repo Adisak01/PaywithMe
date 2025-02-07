@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ข้อมูลรายรับและรายจ่าย</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>ข้อมูลรายรับและรายจ่าย</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="#รายรับ">รายรับ</a></li>
+      <li><a href="#รายจ่าย">รายจ่าย</a></li>
+      <li><a href="#สรุป">สรุป</a></li>
+    </ul>
+  </nav>
+  <main>
+    <section id="รายรับ">
+      <h2>รายรับ</h2>
+      <table>
+        <tr>
+          <th>เดือน</th>
+          <th>รายรับจากงานหลัก</th>
+          <th>รายรับจากงานเสริม</th>
+          <th>รายรับอื่นๆ</th>
+        </tr>
+        <!-- ข้อมูลรายรับ -->
+      </table>
+    </section>
+    <section id="รายจ่าย">
+      <h2>รายจ่าย</h2>
+      <table>
+        <tr>
+          <th>เดือน</th>
+          <th>ค่าบ้าน</th>
+          <th>ค่ารถ</th>
+          <th>ค่าเน็ต</th>
+          <th>ค่าประกันรถ</th>
+          <th>ค่าอื่นๆ</th>
+        </tr>
+        <!-- ข้อมูลรายจ่าย -->
+      </table>
+    </section>
+    <section id="สรุป">
+      <h2>สรุป</h2>
+      <table>
+        <tr>
+          <th>เดือน</th>
+          <th>รายรับ</th>
+          <th>รายจ่าย</th>
+          <th>เงินคงเหลือ</th>
+        </tr>
+        <!-- ข้อมูลสรุป -->
+      </table>
+    </section>
+  </main>
+</body>
+</html>
+```
+
+```
+/* CSS */
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #f0f0f0;
+  padding: 20px;
+  text-align: center;
+}
+
+nav {
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  display: inline-block;
+  margin-right: 20px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+section {
+  background-color: #f0f0f0;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+</style>
