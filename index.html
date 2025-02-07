@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monthly Budget Overview</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         body {
             background-color: #f8f9fa;
             font-family: 'Arial', sans-serif;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 30px auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
         }
         .highlight {
             font-weight: bold;
@@ -37,6 +38,10 @@
             border-radius: 8px;
             border: none;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.02);
         }
         .card-header {
             background-color: #3498db;
@@ -46,12 +51,12 @@
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
         }
-        .card-body {
-            font-size: 18px;
+        .fadeIn {
+            animation: fadeIn 1s ease-in-out;
         }
-        .text-note {
-            font-size: 14px;
-            color: #666;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -59,79 +64,90 @@
 
 <div class="container">
     <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget Overview</h2>
-    
-    <!-- Income -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-money-bill-wave"></i> Income
-        </div>
-        <div class="card-body text-center">
-            <p class="highlight">34,000 THB</p>
-        </div>
-    </div>
 
-    <!-- Expenses -->
+    <!-- Input Form -->
     <div class="card">
-        <div class="card-header">
-            <i class="fas fa-file-invoice-dollar"></i> Expenses
-        </div>
+        <div class="card-header"><i class="fas fa-edit"></i> Enter Your Budget</div>
         <div class="card-body">
-            <p><i class="icon fas fa-home"></i> Housing: 8,000 THB</p>
-            <p><i class="icon fas fa-car"></i> Car: 9,980 THB</p>
-            <p><i class="icon fas fa-wifi"></i> Internet: 1,000 THB</p>
-            <p><i class="icon fas fa-shield-alt"></i> Car Insurance: 1,730 THB</p>
-            <p><i class="icon fas fa-shopping-cart"></i> Other Expenses: 1,000 THB</p>
-            <p><i class="icon fas fa-piggy-bank"></i> Savings: 1,000 THB</p>
-            <p><i class="icon fas fa-gas-pump"></i> Gasoline: 1,500 THB</p>
-            <hr>
-            <p class="highlight"><i class="fas fa-calculator"></i> Total Expenses: 25,210 THB</p>
+            <label>Income (THB):</label>
+            <input type="number" id="income" class="form-control mb-2" value="34000">
+            <label>Total Expenses (THB):</label>
+            <input type="number" id="expenses" class="form-control mb-2" value="25210">
+            <label>Target Savings (THB):</label>
+            <input type="number" id="targetSavings" class="form-control mb-2" value="1700">
+            <button class="btn btn-primary w-100" onclick="calculateBudget()">Calculate</button>
         </div>
     </div>
 
-    <!-- Remaining Balance -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-balance-scale"></i> Remaining Balance
+    <!-- Output Section -->
+    <div id="results" class="fadeIn">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-balance-scale"></i> Remaining Balance</div>
+            <div class="card-body text-center">
+                <p class="highlight" id="remainingBalance">8,790 THB</p>
+            </div>
         </div>
-        <div class="card-body text-center">
-            <p class="highlight">8,790 THB</p>
-        </div>
-    </div>
 
-    <!-- Savings Recommendation -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-piggy-bank"></i> Recommended Savings
+        <div class="card">
+            <div class="card-header"><i class="fas fa-piggy-bank"></i> Recommended Savings</div>
+            <div class="card-body text-center">
+                <p class="highlight" id="suggestedSavings">1,700 THB</p>
+            </div>
         </div>
-        <div class="card-body text-center">
-            <p class="highlight">1,700 THB (5% of income)</p>
-        </div>
-    </div>
 
-    <!-- Money Available for Spending -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-coins"></i> Money Available for Spending
+        <div class="card">
+            <div class="card-header"><i class="fas fa-coins"></i> Money Available for Spending</div>
+            <div class="card-body text-center">
+                <p class="highlight" id="spendingMoney">7,090 THB</p>
+            </div>
         </div>
-        <div class="card-body text-center">
-            <p class="highlight">7,090 THB</p>
-        </div>
-    </div>
 
-    <!-- Daily Spending Limit -->
-    <div class="card">
-        <div class="card-header">
-            <i class="fas fa-calendar-day"></i> Daily Spending Limit
-        </div>
-        <div class="card-body text-center">
-            <p class="highlight">236.33 THB</p>
-            <p class="text-note">*This may not be enough for daily food expenses.</p>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-calendar-day"></i> Daily Spending Limit</div>
+            <div class="card-body text-center">
+                <p class="highlight" id="dailyLimit">236.33 THB</p>
+                <p class="text-note">*This may not be enough for daily food expenses.</p>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// โหลดข้อมูลที่บันทึกไว้
+window.onload = function() {
+    if (localStorage.getItem("income")) {
+        document.getElementById('income').value = localStorage.getItem("income");
+        document.getElementById('expenses').value = localStorage.getItem("expenses");
+        document.getElementById('targetSavings').value = localStorage.getItem("targetSavings");
+        calculateBudget();
+    }
+}
+
+// ฟังก์ชันคำนวณและบันทึกข้อมูลลง LocalStorage
+function calculateBudget() {
+    let income = parseFloat(document.getElementById('income').value);
+    let expenses = parseFloat(document.getElementById('expenses').value);
+    let targetSavings = parseFloat(document.getElementById('targetSavings').value);
+
+    let remainingBalance = income - expenses;
+    let suggestedSavings = income * 0.05;
+    let spendingMoney = remainingBalance - targetSavings;
+    let dailyLimit = spendingMoney / 30;
+
+    document.getElementById('remainingBalance').innerHTML = remainingBalance.toFixed(2) + " THB";
+    document.getElementById('suggestedSavings').innerHTML = suggestedSavings.toFixed(2) + " THB";
+    document.getElementById('spendingMoney').innerHTML = spendingMoney.toFixed(2) + " THB";
+    document.getElementById('dailyLimit').innerHTML = dailyLimit.toFixed(2) + " THB";
+
+    // บันทึกข้อมูลลง LocalStorage
+    localStorage.setItem("income", income);
+    localStorage.setItem("expenses", expenses);
+    localStorage.setItem("targetSavings", targetSavings);
+}
+</script>
 
 </body>
 </html>
