@@ -109,7 +109,7 @@
 window.onload = function() {
     if (localStorage.getItem("income")) {
         document.getElementById('income').value = localStorage.getItem("income");
-        document.getElementById('expenses').value = localStorage.getItem("expenses");
+        /*document.getElementById('expenses').value = localStorage.getItem("expenses");*/
     }
     loadExpenses();
     calculateBudget();
