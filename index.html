@@ -38,6 +38,9 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .status-warning {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -52,7 +55,7 @@
             <input type="number" id="income" class="form-control mb-2" value="34000">
 
             <label><i class="fas fa-receipt"></i> Total Expenses (THB):</label>
-            <input type="number" id="expenses" class="form-control mb-2" value="0">
+            <input type="number" id="expenses" class="form-control mb-2" value="0" readonly>
 
             <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#expenseModal"><i class="fas fa-plus"></i> Add Expense</button>
             <button class="btn btn-primary w-100 mt-2" onclick="calculateBudget()"><i class="fas fa-calculator"></i> Calculate</button>
@@ -81,6 +84,7 @@
                 <p><strong>Money Available for Spending:</strong> <span id="spendingMoney" class="highlight">-</span> THB</p>
                 <p><strong>Daily Spending Limit:</strong> <span id="dailyLimit" class="highlight">-</span> THB</p>
                 <p><strong>Money Spent Today:</strong> <span id="dailySpent" class="highlight">-</span> THB</p>
+                <p><strong>Status:</strong> <span id="status" class="status-warning">-</span></p>
             </div>
         </div>
     </div>
@@ -127,173 +131,65 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// โหลดข้อมูลที่บันทึกไว้
-window.onload = function() {
-    if (localStorage.getItem("income")) {
-        document.getElementById('income').value = localStorage.getItem("income");
-        document.getElementById('expenses').value = localStorage.getItem("expenses");
+// Initialize an empty array to store expenses
+let expensesList = [];
+
+// Function to add expense
+function addExpense() {
+    const expenseName = document.getElementById("expenseName").value;
+    const expenseAmount = parseFloat(document.getElementById("expenseAmount").value);
+
+    if (expenseName && expenseAmount > 0) {
+        expensesList.push({ name: expenseName, amount: expenseAmount });
+        updateExpenseList();
+        calculateTotalExpenses();
+        calculateBudget();
+        $('#expenseModal').modal('hide');
+    } else {
+        alert("Please enter a valid expense name and amount");
     }
-    loadExpenses();
-    calculateBudget();
-    loadGraph();
 }
 
-// คำนวณงบประมาณ
+// Function to update the expense list on the UI
+function updateExpenseList() {
+    const expenseListElement = document.getElementById("expenseList");
+    expenseListElement.innerHTML = ""; // Clear existing list
+
+    expensesList.forEach((expense, index) => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `${expense.name}: ${expense.amount.toFixed(2)} THB 
+            <span class="delete-btn" onclick="deleteExpense(${index})"><i class="fas fa-trash-alt"></i></span>`;
+        expenseListElement.appendChild(li);
+    });
+}
+
+// Function to calculate the total expenses
+function calculateTotalExpenses() {
+    const totalExpenses = expensesList.reduce((total, expense) => total + expense.amount, 0);
+    document.getElementById('expenses').value = totalExpenses.toFixed(2);
+}
+
+// Function to calculate the budget
 function calculateBudget() {
     let income = parseFloat(document.getElementById('income').value);
-    let expenses = parseFloat(document.getElementById('expenses').value);
-    let remainingBalance = income - expenses;
+    let totalExpenses = parseFloat(document.getElementById('expenses').value);
+    let remainingBalance = income - totalExpenses;
     let dailyLimit = remainingBalance / 30;
 
     document.getElementById('remainingBalance').innerHTML = remainingBalance.toFixed(2);
     document.getElementById('spendingMoney').innerHTML = remainingBalance.toFixed(2);
     document.getElementById('dailyLimit').innerHTML = dailyLimit.toFixed(2);
-
-    localStorage.setItem("income", income);
-    localStorage.setItem("expenses", expenses);
 }
 
-// เพิ่มค่าใช้จ่าย
-function addExpense() {
-    let name = document.getElementById('expenseName').value;
-    let amount = parseFloat(document.getElementById('expenseAmount').value);
-    let expenses = parseFloat(document.getElementById('expenses').value);
-
-    if (name && amount) {
-        let expenseList = JSON.parse(localStorage.getItem("expenseList")) || [];
-        expenseList.push({ name, amount });
-        localStorage.setItem("expenseList", JSON.stringify(expenseList));
-
-        document.getElementById('expenses').value = expenses + amount;
-        localStorage.setItem("expenses", expenses + amount);
-
-        loadExpenses();
-        calculateBudget();
-        loadGraph();
-    }
-}
-
-// คำนวณแผนการเก็บเงินสำหรับสิ่งที่อยากซื้อ
-function calculatePurchasePlan() {
-    let purchaseItem = document.getElementById('purchaseItem').value;
-    let monthsToSave = parseInt(document.getElementById('monthsToSave').value);
-    let remainingBalance = parseFloat(document.getElementById('spendingMoney').innerText);
-    let dailyLimit = parseFloat(document.getElementById('dailyLimit').innerText);
-
-    if (purchaseItem && monthsToSave) {
-        let amountNeeded = remainingBalance / monthsToSave;
-
-        // คำนวณยอดที่ต้องเก็บต่อเดือน
-        let newDailyLimit = dailyLimit - amountNeeded / 30;
-        if (newDailyLimit < 300) {
-            alert("Daily spending limit cannot fall below 300 THB");
-            return;
-        }
-
-        let monthlySaving = amountNeeded;
-
-        alert(`To buy "${purchaseItem}", you need to save ${monthlySaving.toFixed(2)} THB per month for ${monthsToSave} months.`);
-
-        // แสดงข้อมูล
-        document.getElementById('spendingMoney').innerHTML = (remainingBalance - monthlySaving).toFixed(2);
-        document.getElementById('dailyLimit').innerHTML = newDailyLimit.toFixed(2);
-
-        localStorage.setItem("purchaseItem", purchaseItem);
-        localStorage.setItem("monthlySaving", monthlySaving);
-    }
-}
-
-// โหลดรายการรายจ่าย
-function loadExpenses() {
-    let expenseList = JSON.parse(localStorage.getItem("expenseList")) || [];
-    let html = "";
-    expenseList.forEach((expense, index) => {
-        html += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    ${expense.name}: <strong>${expense.amount} THB</strong>
-                    <span class="delete-btn" onclick="deleteExpense(${index})"><i class="fas fa-trash-alt"></i></span>
-                 </li>`;
-    });
-    document.getElementById('expenseList').innerHTML = html;
-}
-
-// ลบรายจ่าย
+// Function to delete an expense
 function deleteExpense(index) {
-    let expenseList = JSON.parse(localStorage.getItem("expenseList"));
-    let expenses = parseFloat(document.getElementById('expenses').value) - expenseList[index].amount;
-    
-    expenseList.splice(index, 1);
-    localStorage.setItem("expenseList", JSON.stringify(expenseList));
-    document.getElementById('expenses').value = expenses;
-    localStorage.setItem("expenses", expenses);
-
-    loadExpenses();
+    expensesList.splice(index, 1);
+    updateExpenseList();
+    calculateTotalExpenses();
     calculateBudget();
-    loadGraph();
 }
 
-// แสดงเงินที่ใช้ไปวันนี้
-function showDailySpent() {
-    let expenses = parseFloat(document.getElementById('expenses').value);
-    let dailySpent = expenses / 30;
-    
-    document.getElementById('dailySpent').innerHTML = dailySpent.toFixed(2) + " THB";
-
-    // บันทึกข้อมูลประจำวัน
-    let today = new Date().toISOString().split('T')[0]; // ได้วันที่ในรูปแบบ YYYY-MM-DD
-    let dailyData = JSON.parse(localStorage.getItem("dailyData")) || {};
-    dailyData[today] = dailySpent;
-    localStorage.setItem("dailyData", JSON.stringify(dailyData));
-
-    // อัพเดตข้อมูลรายเดือนและรายปี
-    updateMonthlySummary();
-    updateYearlySummary();
-}
-
-// อัพเดตกราฟ
-function loadGraph() {
-    let expenseList = JSON.parse(localStorage.getItem("expenseList")) || [];
-    let dailyData = JSON.parse(localStorage.getItem("dailyData")) || {};
-
-    // สรุปรายเดือน
-    let monthlyExpenses = [];
-    for (let i = 0; i < 12; i++) {
-        let total = 0;
-        expenseList.forEach(expense => {
-            total += expense.amount;
-        });
-        monthlyExpenses.push(total);
-    }
-
-    // สรุปรายปี
-    let yearlyExpenses = [];
-    for (let month in dailyData) {
-        yearlyExpenses.push(dailyData[month]);
-    }
-
-    // สร้างกราฟ
-    var ctx = document.getElementById('expenseChart').getContext('2d');
-    var chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            datasets: [{
-                label: 'Monthly Expenses (THB)',
-                data: monthlyExpenses,
-                backgroundColor: '#3498db',
-                borderColor: '#2980b9',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
 </script>
 
 </body>
