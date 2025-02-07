@@ -1,124 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ข้อมูลรายรับและรายจ่าย</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Budget Overview</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .highlight {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .icon {
+            font-size: 20px;
+            margin-right: 10px;
+            color: #3498db;
+        }
+        .card {
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .card-body {
+            font-size: 18px;
+        }
+        .text-note {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>ข้อมูลรายรับและรายจ่าย</h1>
-  </header>
-  <nav>
-    <ul>
-      <li><a href="#รายรับ">รายรับ</a></li>
-      <li><a href="#รายจ่าย">รายจ่าย</a></li>
-      <li><a href="#สรุป">สรุป</a></li>
-    </ul>
-  </nav>
-  <main>
-    <section id="รายรับ">
-      <h2>รายรับ</h2>
-      <table>
-        <tr>
-          <th>เดือน</th>
-          <th>รายรับจากงานหลัก</th>
-          <th>รายรับจากงานเสริม</th>
-          <th>รายรับอื่นๆ</th>
-        </tr>
-        <!-- ข้อมูลรายรับ -->
-      </table>
-    </section>
-    <section id="รายจ่าย">
-      <h2>รายจ่าย</h2>
-      <table>
-        <tr>
-          <th>เดือน</th>
-          <th>ค่าบ้าน</th>
-          <th>ค่ารถ</th>
-          <th>ค่าเน็ต</th>
-          <th>ค่าประกันรถ</th>
-          <th>ค่าอื่นๆ</th>
-        </tr>
-        <!-- ข้อมูลรายจ่าย -->
-      </table>
-    </section>
-    <section id="สรุป">
-      <h2>สรุป</h2>
-      <table>
-        <tr>
-          <th>เดือน</th>
-          <th>รายรับ</th>
-          <th>รายจ่าย</th>
-          <th>เงินคงเหลือ</th>
-        </tr>
-        <!-- ข้อมูลสรุป -->
-      </table>
-    </section>
-  </main>
+
+<div class="container">
+    <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget Overview</h2>
+    
+    <!-- Income -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-money-bill-wave"></i> Income
+        </div>
+        <div class="card-body text-center">
+            <p class="highlight">34,000 THB</p>
+        </div>
+    </div>
+
+    <!-- Expenses -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-file-invoice-dollar"></i> Expenses
+        </div>
+        <div class="card-body">
+            <p><i class="icon fas fa-home"></i> Housing: 8,000 THB</p>
+            <p><i class="icon fas fa-car"></i> Car: 9,980 THB</p>
+            <p><i class="icon fas fa-wifi"></i> Internet: 1,000 THB</p>
+            <p><i class="icon fas fa-shield-alt"></i> Car Insurance: 1,730 THB</p>
+            <p><i class="icon fas fa-shopping-cart"></i> Other Expenses: 1,000 THB</p>
+            <p><i class="icon fas fa-piggy-bank"></i> Savings: 1,000 THB</p>
+            <p><i class="icon fas fa-gas-pump"></i> Gasoline: 1,500 THB</p>
+            <hr>
+            <p class="highlight"><i class="fas fa-calculator"></i> Total Expenses: 25,210 THB</p>
+        </div>
+    </div>
+
+    <!-- Remaining Balance -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-balance-scale"></i> Remaining Balance
+        </div>
+        <div class="card-body text-center">
+            <p class="highlight">8,790 THB</p>
+        </div>
+    </div>
+
+    <!-- Savings Recommendation -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-piggy-bank"></i> Recommended Savings
+        </div>
+        <div class="card-body text-center">
+            <p class="highlight">1,700 THB (5% of income)</p>
+        </div>
+    </div>
+
+    <!-- Money Available for Spending -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-coins"></i> Money Available for Spending
+        </div>
+        <div class="card-body text-center">
+            <p class="highlight">7,090 THB</p>
+        </div>
+    </div>
+
+    <!-- Daily Spending Limit -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-calendar-day"></i> Daily Spending Limit
+        </div>
+        <div class="card-body text-center">
+            <p class="highlight">236.33 THB</p>
+            <p class="text-note">*This may not be enough for daily food expenses.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
-</htm>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-header {
-  background-color: #f0f0f0;
-  padding: 20px;
-  text-align: center;
-}
-
-nav {
-  background-color: #333;
-  color: #fff;
-  padding: 10px;
-  text-align: center;
-}
-
-nav ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-nav li {
-  display: inline-block;
-  margin-right: 20px;
-}
-
-nav a {
-  color: #fff;
-  text-decoration: none;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-}
-
-section {
-  background-color: #f0f0f0;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-
-th {
-  background-color: #f0f0f0;
-}
-</style>
+</html>
