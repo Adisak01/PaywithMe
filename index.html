@@ -5,33 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monthly Budget Planner</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #343a40;
+            color: white;
+        }
+        .modal-content {
+            border-radius: 10px;
+        }
+        .btn {
+            border-radius: 20px;
+        }
+        .list-group-item {
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h2>Monthly Budget Planner</h2>
 
-        <!-- Input Monthly Income -->
-        <div class="form-group">
-            <label for="monthlyIncome">Monthly Income:</label>
-            <input type="number" id="monthlyIncome" class="form-control" placeholder="Enter your monthly income">
+    <div class="container">
+        <h2 class="text-center">Monthly Budget Planner</h2>
+
+        <!-- Monthly Income Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Set Monthly Income</h5>
+            </div>
+            <div class="card-body">
+                <input type="number" id="monthlyIncome" class="form-control" placeholder="Enter your monthly income" />
+            </div>
         </div>
 
-        <!-- Display Total Expenses -->
-        <h5>Total Expenses: <span id="totalExpenses">0</span></h5>
+        <!-- Total Expenses -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Total Expenses</h5>
+            </div>
+            <div class="card-body">
+                <h4 id="totalExpenses">0</h4>
+            </div>
+        </div>
 
-        <!-- Monthly Expenses List -->
-        <h4>Monthly Expenses</h4>
-        <ul id="expenseList" class="list-group mb-3"></ul>
+        <!-- Monthly Expenses Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Monthly Expenses</h5>
+            </div>
+            <div class="card-body">
+                <ul id="expenseList" class="list-group mb-3"></ul>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#addExpenseModal">
+                    <i class="fas fa-plus-circle"></i> Add Monthly Expense
+                </button>
+            </div>
+        </div>
 
-        <!-- Button to Add Expense -->
-        <button class="btn btn-primary" data-toggle="modal" data-target="#addExpenseModal">Add Monthly Expense</button>
+        <!-- Today's Expense Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Today's Expenses</h5>
+            </div>
+            <div class="card-body">
+                <ul id="todayExpenseList" class="list-group mb-3"></ul>
+                <button class="btn btn-info" data-toggle="modal" data-target="#addTodayExpenseModal">
+                    <i class="fas fa-plus-circle"></i> Add Today's Expense
+                </button>
+            </div>
+        </div>
 
-        <!-- Remaining Money and Daily Budget -->
-        <h5>Remaining Money: <span id="remainingMoney">0</span></h5>
-        <h5>Daily Budget: <span id="dailyBudget">0</span></h5>
+        <!-- Daily Expenses Chart -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Daily Expenses vs Daily Limit</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailyExpensesChart"></canvas>
+            </div>
+        </div>
 
-        <!-- Add Expense Modal -->
+        <!-- Add Monthly Expense Modal -->
         <div class="modal fade" id="addExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -42,10 +105,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <label for="expenseName">Expense Name:</label>
-                        <input type="text" id="expenseName" class="form-control" placeholder="Expense Name">
-                        <label for="expenseAmount">Amount:</label>
-                        <input type="number" id="expenseAmount" class="form-control" placeholder="Amount">
+                        <input type="text" id="expenseName" class="form-control" placeholder="Expense Name" />
+                        <input type="number" id="expenseAmount" class="form-control mt-3" placeholder="Amount" />
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -55,12 +116,7 @@
             </div>
         </div>
 
-        <!-- Expense for Today -->
-        <h4>Today's Expenses</h4>
-        <ul id="todayExpenseList" class="list-group mb-3"></ul>
-        <button class="btn btn-info" data-toggle="modal" data-target="#addTodayExpenseModal">Add Today's Expense</button>
-
-        <!-- Today's Expense Modal -->
+        <!-- Add Today's Expense Modal -->
         <div class="modal fade" id="addTodayExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addTodayExpenseModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -71,10 +127,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <label for="todayExpenseName">Expense Name:</label>
-                        <input type="text" id="todayExpenseName" class="form-control" placeholder="Expense Name">
-                        <label for="todayExpenseAmount">Amount:</label>
-                        <input type="number" id="todayExpenseAmount" class="form-control" placeholder="Amount">
+                        <input type="text" id="todayExpenseName" class="form-control" placeholder="Expense Name" />
+                        <input type="number" id="todayExpenseAmount" class="form-control mt-3" placeholder="Amount" />
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -83,137 +137,150 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Chart to Show Daily Expenses -->
-        <h5>Daily Expenses Chart</h5>
-        <canvas id="dailyExpensesChart" width="400" height="200"></canvas>
+    <script>
+        let monthlyIncome = 0;
+        let monthlyExpenses = JSON.parse(localStorage.getItem('monthlyExpenses')) || [];
+        let todayExpenses = JSON.parse(localStorage.getItem('todayExpenses')) || [];
+        const dailyExpenses = [];
+        const dailyLimit = 100;  // Set daily spending limit
+        let totalExpenses = 0;
 
-        <script>
-            let monthlyIncome = 0;
-            let monthlyExpenses = JSON.parse(localStorage.getItem('monthlyExpenses')) || [];
-            let todayExpenses = JSON.parse(localStorage.getItem('todayExpenses')) || [];
-            const dailyExpenses = [];
-            let totalExpenses = 0;
+        function updateExpenseList() {
+            const expenseList = document.getElementById('expenseList');
+            expenseList.innerHTML = '';
+            totalExpenses = 0;
 
-            function updateExpenseList() {
-                const expenseList = document.getElementById('expenseList');
-                expenseList.innerHTML = '';
-                totalExpenses = 0;
+            monthlyExpenses.forEach((expense, index) => {
+                totalExpenses += expense.amount;
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerHTML = `${expense.name}: ${expense.amount} <button class="btn btn-danger btn-sm float-right" onclick="deleteMonthlyExpense(${index})"><i class="fas fa-trash"></i></button>`;
+                expenseList.appendChild(li);
+            });
 
-                monthlyExpenses.forEach((expense, index) => {
-                    totalExpenses += expense.amount;
-                    const li = document.createElement('li');
-                    li.classList.add('list-group-item');
-                    li.innerHTML = `${expense.name}: ${expense.amount} <button class="btn btn-danger btn-sm float-right" onclick="deleteMonthlyExpense(${index})">Delete</button>`;
-                    expenseList.appendChild(li);
-                });
+            document.getElementById('totalExpenses').textContent = totalExpenses;
+            updateRemainingMoney();
+            updateDailyBudget();
+        }
 
-                document.getElementById('totalExpenses').textContent = totalExpenses;
-                updateRemainingMoney();
-                updateDailyBudget();
+        function updateTodayExpenseList() {
+            const todayExpenseList = document.getElementById('todayExpenseList');
+            todayExpenseList.innerHTML = '';
+
+            todayExpenses.forEach((expense, index) => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerHTML = `${expense.name}: ${expense.amount} <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})"><i class="fas fa-trash"></i></button>`;
+                todayExpenseList.appendChild(li);
+            });
+        }
+
+        function updateRemainingMoney() {
+            const remainingMoney = monthlyIncome - totalExpenses;
+            document.getElementById('remainingMoney').textContent = remainingMoney;
+
+            const dailyBudget = remainingMoney / 30;
+            document.getElementById('dailyBudget').textContent = dailyBudget.toFixed(2);
+
+            updateChart();
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById('dailyExpensesChart').getContext('2d');
+            const dailyExpensesTotal = todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+            if (dailyExpenses.length === 30) {
+                dailyExpenses.shift();
             }
 
-            function updateTodayExpenseList() {
-                const todayExpenseList = document.getElementById('todayExpenseList');
-                todayExpenseList.innerHTML = '';
-
-                todayExpenses.forEach((expense, index) => {
-                    const li = document.createElement('li');
-                    li.classList.add('list-group-item');
-                    li.innerHTML = `${expense.name}: ${expense.amount} <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})">Delete</button>`;
-                    todayExpenseList.appendChild(li);
-                });
-            }
-
-            function updateRemainingMoney() {
-                const remainingMoney = monthlyIncome - totalExpenses;
-                document.getElementById('remainingMoney').textContent = remainingMoney;
-
-                const dailyBudget = remainingMoney / 30;
-                document.getElementById('dailyBudget').textContent = dailyBudget.toFixed(2);
-
-                updateChart();
-            }
-
-            function updateChart() {
-                const ctx = document.getElementById('dailyExpensesChart').getContext('2d');
-                const dailyExpensesTotal = todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-
-                if (dailyExpenses.length === 30) {
-                    dailyExpenses.shift();
-                }
-
-                dailyExpenses.push(dailyExpensesTotal);
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: Array.from({ length: dailyExpenses.length }, (_, i) => i + 1),
-                        datasets: [{
+            dailyExpenses.push(dailyExpensesTotal);
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: dailyExpenses.length }, (_, i) => `Day ${i + 1}`),
+                    datasets: [
+                        {
                             label: 'Daily Expenses',
                             data: dailyExpenses,
                             borderColor: 'rgb(75, 192, 192)',
+                            fill: false,
                             tension: 0.1
-                        }]
-                    }
-                });
-            }
-
-            document.getElementById('saveExpense').addEventListener('click', function() {
-                const expenseName = document.getElementById('expenseName').value;
-                const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
-
-                if (expenseName && expenseAmount) {
-                    monthlyExpenses.push({ name: expenseName, amount: expenseAmount });
-                    localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
-                    updateExpenseList();
-                    $('#addExpenseModal').modal('hide');
+                        },
+                        {
+                            label: 'Daily Limit',
+                            data: Array.from({ length: dailyExpenses.length }, () => dailyLimit),
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
                 }
             });
+        }
 
-            document.getElementById('saveTodayExpense').addEventListener('click', function() {
-                const expenseName = document.getElementById('todayExpenseName').value;
-                const expenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
+        document.getElementById('saveExpense').addEventListener('click', function() {
+            const expenseName = document.getElementById('expenseName').value;
+            const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
 
-                if (expenseName && expenseAmount) {
-                    todayExpenses.push({ name: expenseName, amount: expenseAmount });
-                    localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
-                    updateTodayExpenseList();
-                    updateRemainingMoney();
-                    $('#addTodayExpenseModal').modal('hide');
-                }
-            });
-
-            function deleteMonthlyExpense(index) {
-                monthlyExpenses.splice(index, 1);
+            if (expenseName && expenseAmount) {
+                monthlyExpenses.push({ name: expenseName, amount: expenseAmount });
                 localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
                 updateExpenseList();
+                $('#addExpenseModal').modal('hide');
             }
+        });
 
-            function deleteTodayExpense(index) {
-                todayExpenses.splice(index, 1);
+        document.getElementById('saveTodayExpense').addEventListener('click', function() {
+            const expenseName = document.getElementById('todayExpenseName').value;
+            const expenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
+
+            if (expenseName && expenseAmount) {
+                todayExpenses.push({ name: expenseName, amount: expenseAmount });
                 localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
                 updateTodayExpenseList();
                 updateRemainingMoney();
+                $('#addTodayExpenseModal').modal('hide');
+            }
+        });
+
+        function deleteMonthlyExpense(index) {
+            monthlyExpenses.splice(index, 1);
+            localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
+            updateExpenseList();
+        }
+
+        function deleteTodayExpense(index) {
+            todayExpenses.splice(index, 1);
+            localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
+            updateTodayExpenseList();
+            updateRemainingMoney();
+        }
+
+        window.onload = function() {
+            const storedIncome = localStorage.getItem('monthlyIncome');
+            if (storedIncome) {
+                monthlyIncome = parseFloat(storedIncome);
+                document.getElementById('monthlyIncome').value = monthlyIncome;
+                updateExpenseList();
             }
 
-            window.onload = function() {
-                const storedIncome = localStorage.getItem('monthlyIncome');
-                if (storedIncome) {
-                    monthlyIncome = parseFloat(storedIncome);
-                    document.getElementById('monthlyIncome').value = monthlyIncome;
-                    updateExpenseList();
-                }
-
-                document.getElementById('monthlyIncome').addEventListener('blur', function() {
-                    monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
-                    localStorage.setItem('monthlyIncome', monthlyIncome);
-                    updateExpenseList();
-                });
-            };
-        </script>
-    </div>
+            document.getElementById('monthlyIncome').addEventListener('blur', function() {
+                monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+                localStorage.setItem('monthlyIncome', monthlyIncome);
+                updateExpenseList();
+            });
+        };
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+</html>
