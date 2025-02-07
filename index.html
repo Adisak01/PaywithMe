@@ -40,33 +40,12 @@
       <p id="moneyPerDay">0</p>
     </div>
 
-    <!-- Add Expense Modal -->
-    <div class="modal fade" id="addExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="addExpenseModalLabel">Add Expense</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <label for="expenseName">Expense Name:</label>
-            <input type="text" id="expenseName" class="form-control" placeholder="Expense Name">
-            <label for="expenseAmount">Amount:</label>
-            <input type="number" id="expenseAmount" class="form-control" placeholder="Amount">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id="saveExpense">Save Expense</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Today's Expense -->
-    <h4>Today's Expense</h4>
+    <!-- Today's Expense Section -->
+    <h4>Today's Expenses</h4>
     <button class="btn btn-info mb-3" data-toggle="modal" data-target="#addTodayExpenseModal">Add Today's Expense</button>
+
+    <!-- Today's Expense List -->
+    <ul id="todayExpenseList" class="list-group mb-3"></ul>
 
     <!-- Today's Expense Modal -->
     <div class="modal fade" id="addTodayExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addTodayExpenseModalLabel" aria-hidden="true">
@@ -134,7 +113,7 @@
       }
       if (storedDailyExpenses) {
         dailyExpenses = JSON.parse(storedDailyExpenses);
-        updateDailyExpenses();
+        updateTodayExpenseList();
         updateExpenseChart();
       }
       updateRemainingMoney();
@@ -169,7 +148,7 @@
 
       dailyExpenses.push({ name: todayExpenseName, amount: todayExpenseAmount, overLimit: isOverLimit });
       localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses)); // Save to localStorage
-      updateDailyExpenses();
+      updateTodayExpenseList();
       updateExpenseChart();
       $('#addTodayExpenseModal').modal('hide');
     });
@@ -208,15 +187,26 @@
       document.getElementById('moneyPerDay').textContent = moneyPerDay.toFixed(2);
     }
 
-    // Update Today's Expenses
-    function updateDailyExpenses() {
-      let totalDailyExpense = 0;
+    // Update Today's Expenses List
+    function updateTodayExpenseList() {
+      const todayExpenseList = document.getElementById('todayExpenseList');
+      todayExpenseList.innerHTML = '';
 
-      dailyExpenses.forEach(expense => {
-        totalDailyExpense += expense.amount;
+      dailyExpenses.forEach((expense, index) => {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.innerHTML = `${expense.name} - ${expense.amount} ${expense.overLimit ? "(Over Budget)" : "(OK)"} 
+        <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})">Delete</button>`;
+        todayExpenseList.appendChild(li);
       });
+    }
 
-      document.getElementById('yearlySummary').textContent = `Total Remaining: ${monthlyIncome - totalDailyExpense}`;
+    // Delete Today's Expense
+    function deleteTodayExpense(index) {
+      dailyExpenses.splice(index, 1);
+      localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses)); // Save to localStorage
+      updateTodayExpenseList();
+      updateExpenseChart();
     }
 
     // Update Expense Chart
