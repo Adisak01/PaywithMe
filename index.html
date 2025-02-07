@@ -175,7 +175,10 @@
             todayExpenses.forEach((expense, index) => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
-                li.innerHTML = `${expense.name}: ${expense.amount} <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})"><i class="fas fa-trash"></i></button>`;
+                li.innerHTML = `${expense.name}: ${expense.amount} (Date: ${expense.date}) 
+                    <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>`;
                 todayExpenseList.appendChild(li);
             });
         }
@@ -236,20 +239,18 @@
                 monthlyExpenses.push({ name: expenseName, amount: expenseAmount });
                 localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
                 updateExpenseList();
-                $('#addExpenseModal').modal('hide');
             }
         });
 
         document.getElementById('saveTodayExpense').addEventListener('click', function() {
-            const expenseName = document.getElementById('todayExpenseName').value;
-            const expenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
+            const todayExpenseName = document.getElementById('todayExpenseName').value;
+            const todayExpenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
+            const todayDate = new Date().toLocaleDateString();
 
-            if (expenseName && expenseAmount) {
-                todayExpenses.push({ name: expenseName, amount: expenseAmount });
+            if (todayExpenseName && todayExpenseAmount) {
+                todayExpenses.push({ name: todayExpenseName, amount: todayExpenseAmount, date: todayDate });
                 localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
                 updateTodayExpenseList();
-                updateRemainingMoney();
-                $('#addTodayExpenseModal').modal('hide');
             }
         });
 
@@ -263,27 +264,10 @@
             todayExpenses.splice(index, 1);
             localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
             updateTodayExpenseList();
-            updateRemainingMoney();
         }
-
-        window.onload = function() {
-            const storedIncome = localStorage.getItem('monthlyIncome');
-            if (storedIncome) {
-                monthlyIncome = parseFloat(storedIncome);
-                document.getElementById('monthlyIncome').value = monthlyIncome;
-                updateExpenseList();
-            }
-
-            document.getElementById('monthlyIncome').addEventListener('blur', function() {
-                monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
-                localStorage.setItem('monthlyIncome', monthlyIncome);
-                updateExpenseList();
-            });
-        };
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
