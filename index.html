@@ -227,36 +227,35 @@
                             tension: 0.1
                         }
                     ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
                 }
             });
         }
 
-        // Function to save monthly expense
-        document.getElementById('saveExpense').addEventListener('click', function() {
+        // Function to add a monthly expense
+        document.getElementById('saveExpense').addEventListener('click', () => {
             const expenseName = document.getElementById('expenseName').value;
             const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
 
-            if (expenseName && expenseAmount) {
+            if (expenseName && !isNaN(expenseAmount)) {
                 monthlyExpenses.push({ name: expenseName, amount: expenseAmount });
                 localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
                 updateExpenseList();
+                $('#addExpenseModal').modal('hide');
             }
         });
 
-        // Function to save today's expense
-        document.getElementById('saveTodayExpense').addEventListener('click', function() {
+        // Function to add today's expense
+        document.getElementById('saveTodayExpense').addEventListener('click', () => {
             const todayExpenseName = document.getElementById('todayExpenseName').value;
             const todayExpenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
             const todayDate = new Date().toLocaleDateString();
 
-            if (todayExpenseName && todayExpenseAmount) {
+            if (todayExpenseName && !isNaN(todayExpenseAmount)) {
                 todayExpenses.push({ name: todayExpenseName, amount: todayExpenseAmount, date: todayDate });
                 localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
                 updateTodayExpenseList();
+                updateRemainingMoney();
+                $('#addTodayExpenseModal').modal('hide');
             }
         });
 
@@ -272,6 +271,7 @@
             todayExpenses.splice(index, 1);
             localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
             updateTodayExpenseList();
+            updateRemainingMoney();
         }
 
         // Load saved data when the page loads
@@ -286,6 +286,7 @@
             updateExpenseList();
             updateTodayExpenseList();
         };
+
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
