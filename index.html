@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Budget Overview</title>
-
+    <title>Monthly Budget Overview with Purchase Plan</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body {
@@ -42,7 +43,7 @@
 <body>
 
 <div class="container">
-    <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget</h2>
+    <h2 class="text-center text-primary mb-4"><i class="fas fa-wallet"></i> Monthly Budget with Purchase Plan</h2>
 
     <!-- Input Form -->
     <div class="card">
@@ -59,6 +60,19 @@
         </div>
     </div>
 
+    <!-- Input for Purchase Plan -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <label><i class="fas fa-shopping-cart"></i> What do you want to buy?</label>
+            <input type="text" id="purchaseItem" class="form-control mb-2" placeholder="Item name">
+
+            <label><i class="fas fa-calendar-check"></i> Months to Save:</label>
+            <input type="number" id="monthsToSave" class="form-control mb-2" placeholder="Months">
+
+            <button class="btn btn-warning w-100 mt-2" onclick="calculatePurchasePlan()"><i class="fas fa-calculator"></i> Calculate Monthly Saving</button>
+        </div>
+    </div>
+
     <!-- Output Section -->
     <div id="results" class="fadeIn">
         <div class="card mt-3">
@@ -68,6 +82,14 @@
                 <p><strong>Daily Spending Limit:</strong> <span id="dailyLimit" class="highlight">-</span> THB</p>
                 <p><strong>Money Spent Today:</strong> <span id="dailySpent" class="highlight">-</span> THB</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Canvas for Graphs -->
+    <div class="card mt-3">
+        <div class="card-header"><i class="fas fa-chart-bar"></i> Spending Overview</div>
+        <div class="card-body">
+            <canvas id="expenseChart"></canvas>
         </div>
     </div>
 
@@ -113,6 +135,7 @@ window.onload = function() {
     }
     loadExpenses();
     calculateBudget();
+    loadGraph();
 }
 
 // คำนวณงบประมาณ
@@ -146,6 +169,37 @@ function addExpense() {
 
         loadExpenses();
         calculateBudget();
+        loadGraph();
+    }
+}
+
+// คำนวณแผนการเก็บเงินสำหรับสิ่งที่อยากซื้อ
+function calculatePurchasePlan() {
+    let purchaseItem = document.getElementById('purchaseItem').value;
+    let monthsToSave = parseInt(document.getElementById('monthsToSave').value);
+    let remainingBalance = parseFloat(document.getElementById('spendingMoney').innerText);
+    let dailyLimit = parseFloat(document.getElementById('dailyLimit').innerText);
+
+    if (purchaseItem && monthsToSave) {
+        let amountNeeded = remainingBalance / monthsToSave;
+
+        // คำนวณยอดที่ต้องเก็บต่อเดือน
+        let newDailyLimit = dailyLimit - amountNeeded / 30;
+        if (newDailyLimit < 300) {
+            alert("Daily spending limit cannot fall below 300 THB");
+            return;
+        }
+
+        let monthlySaving = amountNeeded;
+
+        alert(`To buy "${purchaseItem}", you need to save ${monthlySaving.toFixed(2)} THB per month for ${monthsToSave} months.`);
+
+        // แสดงข้อมูล
+        document.getElementById('spendingMoney').innerHTML = (remainingBalance - monthlySaving).toFixed(2);
+        document.getElementById('dailyLimit').innerHTML = newDailyLimit.toFixed(2);
+
+        localStorage.setItem("purchaseItem", purchaseItem);
+        localStorage.setItem("monthlySaving", monthlySaving);
     }
 }
 
@@ -174,12 +228,71 @@ function deleteExpense(index) {
 
     loadExpenses();
     calculateBudget();
+    loadGraph();
 }
 
 // แสดงเงินที่ใช้ไปวันนี้
 function showDailySpent() {
-    let expenses = document.getElementById('expenses').value;
-    document.getElementById('dailySpent').innerHTML = expenses + " THB";
+    let expenses = parseFloat(document.getElementById('expenses').value);
+    let dailySpent = expenses / 30;
+    
+    document.getElementById('dailySpent').innerHTML = dailySpent.toFixed(2) + " THB";
+
+    // บันทึกข้อมูลประจำวัน
+    let today = new Date().toISOString().split('T')[0]; // ได้วันที่ในรูปแบบ YYYY-MM-DD
+    let dailyData = JSON.parse(localStorage.getItem("dailyData")) || {};
+    dailyData[today] = dailySpent;
+    localStorage.setItem("dailyData", JSON.stringify(dailyData));
+
+    // อัพเดตข้อมูลรายเดือนและรายปี
+    updateMonthlySummary();
+    updateYearlySummary();
+}
+
+// อัพเดตกราฟ
+function loadGraph() {
+    let expenseList = JSON.parse(localStorage.getItem("expenseList")) || [];
+    let dailyData = JSON.parse(localStorage.getItem("dailyData")) || {};
+
+    // สรุปรายเดือน
+    let monthlyExpenses = [];
+    for (let i = 0; i < 12; i++) {
+        let total = 0;
+        expenseList.forEach(expense => {
+            total += expense.amount;
+        });
+        monthlyExpenses.push(total);
+    }
+
+    // สรุปรายปี
+    let yearlyExpenses = [];
+    for (let month in dailyData) {
+        yearlyExpenses.push(dailyData[month]);
+    }
+
+    // สร้างกราฟ
+    var ctx = document.getElementById('expenseChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Monthly Expenses (THB)',
+                data: monthlyExpenses,
+                backgroundColor: '#3498db',
+                borderColor: '#2980b9',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 }
 </script>
 
