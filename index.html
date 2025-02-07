@@ -118,9 +118,32 @@
     let dailyExpenses = [];
     let yearlyRemaining = 0;
 
+    // Load data from localStorage
+    window.onload = function() {
+      const storedIncome = localStorage.getItem('monthlyIncome');
+      const storedMonthlyExpenses = localStorage.getItem('monthlyExpenses');
+      const storedDailyExpenses = localStorage.getItem('dailyExpenses');
+
+      if (storedIncome) {
+        monthlyIncome = parseFloat(storedIncome);
+        document.getElementById('income').value = monthlyIncome;
+      }
+      if (storedMonthlyExpenses) {
+        monthlyExpenses = JSON.parse(storedMonthlyExpenses);
+        updateExpenseList();
+      }
+      if (storedDailyExpenses) {
+        dailyExpenses = JSON.parse(storedDailyExpenses);
+        updateDailyExpenses();
+        updateExpenseChart();
+      }
+      updateRemainingMoney();
+    };
+
     // Handle Monthly Income input
     document.getElementById('income').addEventListener('input', function() {
       monthlyIncome = parseFloat(this.value);
+      localStorage.setItem('monthlyIncome', monthlyIncome); // Save income to localStorage
       updateRemainingMoney();
     });
 
@@ -131,6 +154,7 @@
 
       if(expenseName && expenseAmount) {
         monthlyExpenses.push({ name: expenseName, amount: expenseAmount });
+        localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses)); // Save to localStorage
         updateExpenseList();
         updateRemainingMoney();
         $('#addExpenseModal').modal('hide');
@@ -144,6 +168,7 @@
       const isOverLimit = document.getElementById('isOverLimit').value === 'true';
 
       dailyExpenses.push({ name: todayExpenseName, amount: todayExpenseAmount, overLimit: isOverLimit });
+      localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses)); // Save to localStorage
       updateDailyExpenses();
       updateExpenseChart();
       $('#addTodayExpenseModal').modal('hide');
@@ -169,6 +194,7 @@
     // Delete Monthly Expense
     function deleteExpense(index) {
       monthlyExpenses.splice(index, 1);
+      localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses)); // Save to localStorage
       updateExpenseList();
     }
 
