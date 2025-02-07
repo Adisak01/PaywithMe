@@ -1,252 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Planner</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <style>
-        .modal-header, .modal-footer { background-color: #f8f9fa; }
-        .container { margin-top: 50px; }
-        .card { margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Planner</title>
+  <!-- Bootstrap -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  <style>
+    .container {
+      margin-top: 50px;
+    }
+    .modal-body input {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <h2 class="text-center">Monthly Budget Planner</h2>
-
-    <!-- Display Monthly Income -->
-    <div class="card">
-        <div class="card-body">
-            <h5>Monthly Income: <span id="monthlyIncome">0</span> THB</h5>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#incomeModal">Edit Income</button>
-        </div>
+  <div class="container">
+    <h2>Monthly Expense Planner</h2>
+    
+    <!-- Monthly Income Section -->
+    <div class="mb-3">
+      <label for="income">Monthly Income:</label>
+      <input type="number" id="income" class="form-control" placeholder="Enter Monthly Income">
     </div>
 
-    <!-- Display Monthly Expenses -->
-    <div class="card">
-        <div class="card-body">
-            <h5>Monthly Expenses</h5>
-            <button class="btn btn-success" data-toggle="modal" data-target="#expenseModal">Add Expense</button>
-            <ul id="expenseList"></ul>
-        </div>
+    <!-- Monthly Expense List -->
+    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#addExpenseModal">Add Monthly Expense</button>
+
+    <h4>Monthly Expenses</h4>
+    <ul id="expenseList" class="list-group mb-3"></ul>
+
+    <!-- Display Remaining Money -->
+    <div class="mb-3">
+      <h5>Remaining Money:</h5>
+      <p id="remainingMoney">0</p>
+      <h5>Money Available per Day:</h5>
+      <p id="moneyPerDay">0</p>
     </div>
 
-    <!-- Display Daily Budget -->
-    <div class="card">
-        <div class="card-body">
-            <h5>Daily Budget: <span id="dailyBudget">0</span> THB</h5>
-            <button class="btn btn-info" data-toggle="modal" data-target="#dailyExpenseModal">Add Daily Expense</button>
+    <!-- Add Expense Modal -->
+    <div class="modal fade" id="addExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addExpenseModalLabel">Add Expense</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label for="expenseName">Expense Name:</label>
+            <input type="text" id="expenseName" class="form-control" placeholder="Expense Name">
+            <label for="expenseAmount">Amount:</label>
+            <input type="number" id="expenseAmount" class="form-control" placeholder="Amount">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="saveExpense">Save Expense</button>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Today's Expense -->
+    <h4>Today's Expense</h4>
+    <button class="btn btn-info mb-3" data-toggle="modal" data-target="#addTodayExpenseModal">Add Today's Expense</button>
+
+    <!-- Today's Expense Modal -->
+    <div class="modal fade" id="addTodayExpenseModal" tabindex="-1" role="dialog" aria-labelledby="addTodayExpenseModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addTodayExpenseModalLabel">Add Today's Expense</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label for="todayExpenseName">Expense Name:</label>
+            <input type="text" id="todayExpenseName" class="form-control" placeholder="Expense Name">
+            <label for="todayExpenseAmount">Amount:</label>
+            <input type="number" id="todayExpenseAmount" class="form-control" placeholder="Amount">
+            <label for="isOverLimit">Is it over budget?</label>
+            <select id="isOverLimit" class="form-control">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="saveTodayExpense">Save Today's Expense</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Canvas for Graph -->
-    <div class="card">
-        <div class="card-body">
-            <h5>Expenses Chart</h5>
-            <canvas id="expensesChart" width="400" height="200"></canvas>
-        </div>
-    </div>
+    <h4>Today's Expense Graph</h4>
+    <canvas id="expenseChart" width="400" height="200"></canvas>
+    
+    <!-- Summary -->
+    <h5>Yearly Summary</h5>
+    <p id="yearlySummary">Total Remaining: 0</p>
+  </div>
 
-    <!-- Modals -->
-    <!-- Income Modal -->
-    <div class="modal" id="incomeModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Monthly Income</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="number" id="newIncome" class="form-control" placeholder="Enter Monthly Income">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveIncome">Save</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+  <!-- JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Expense Modal -->
-    <div class="modal" id="expenseModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Expense</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="text" id="expenseName" class="form-control" placeholder="Expense Name">
-                    <input type="number" id="expenseAmount" class="form-control mt-2" placeholder="Amount">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveExpense">Save</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Daily Expense Modal -->
-    <div class="modal" id="dailyExpenseModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Daily Expense</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <input type="text" id="dailyExpenseName" class="form-control" placeholder="Expense Name">
-                    <input type="number" id="dailyExpenseAmount" class="form-control mt-2" placeholder="Amount">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveDailyExpense">Save</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<script>
+  <script>
     let monthlyIncome = 0;
-    let expenses = [];
+    let monthlyExpenses = [];
     let dailyExpenses = [];
-    let dailyLimit = 0;
+    let yearlyRemaining = 0;
 
-    // Save and display monthly income
-    $('#saveIncome').click(function () {
-        monthlyIncome = parseInt($('#newIncome').val()) || 0;
-        localStorage.setItem('monthlyIncome', monthlyIncome);
-        updateMonthlyIncome();
-        $('#incomeModal').modal('hide');
+    // Handle Monthly Income input
+    document.getElementById('income').addEventListener('input', function() {
+      monthlyIncome = parseFloat(this.value);
+      updateRemainingMoney();
     });
 
-    function updateMonthlyIncome() {
-        $('#monthlyIncome').text(monthlyIncome);
-        calculateDailyBudget();
-        displayExpenses();
+    // Save Monthly Expense
+    document.getElementById('saveExpense').addEventListener('click', function() {
+      const expenseName = document.getElementById('expenseName').value;
+      const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
+
+      if(expenseName && expenseAmount) {
+        monthlyExpenses.push({ name: expenseName, amount: expenseAmount });
+        updateExpenseList();
+        updateRemainingMoney();
+        $('#addExpenseModal').modal('hide');
+      }
+    });
+
+    // Save Today's Expense
+    document.getElementById('saveTodayExpense').addEventListener('click', function() {
+      const todayExpenseName = document.getElementById('todayExpenseName').value;
+      const todayExpenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
+      const isOverLimit = document.getElementById('isOverLimit').value === 'true';
+
+      dailyExpenses.push({ name: todayExpenseName, amount: todayExpenseAmount, overLimit: isOverLimit });
+      updateDailyExpenses();
+      updateExpenseChart();
+      $('#addTodayExpenseModal').modal('hide');
+    });
+
+    // Update Monthly Expenses List
+    function updateExpenseList() {
+      const expenseList = document.getElementById('expenseList');
+      expenseList.innerHTML = '';
+      let totalMonthlyExpense = 0;
+
+      monthlyExpenses.forEach((expense, index) => {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.innerHTML = `${expense.name} - ${expense.amount} <button class="btn btn-danger btn-sm float-right" onclick="deleteExpense(${index})">Delete</button>`;
+        expenseList.appendChild(li);
+        totalMonthlyExpense += expense.amount;
+      });
+
+      updateRemainingMoney(totalMonthlyExpense);
     }
 
-    // Load monthly income from localStorage
-    $(document).ready(function () {
-        if (localStorage.getItem('monthlyIncome')) {
-            monthlyIncome = parseInt(localStorage.getItem('monthlyIncome'));
-            updateMonthlyIncome();
-        }
-        if (localStorage.getItem('expenses')) {
-            expenses = JSON.parse(localStorage.getItem('expenses'));
-            displayExpenses();
-        }
-        if (localStorage.getItem('dailyExpenses')) {
-            dailyExpenses = JSON.parse(localStorage.getItem('dailyExpenses'));
-            updateDailyExpenseChart();
-        }
-    });
-
-    // Add Expense
-    $('#saveExpense').click(function () {
-        const expenseName = $('#expenseName').val();
-        const expenseAmount = parseInt($('#expenseAmount').val());
-        if (expenseName && expenseAmount) {
-            expenses.push({ name: expenseName, amount: expenseAmount });
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            displayExpenses();
-            $('#expenseModal').modal('hide');
-        }
-    });
-
-    function displayExpenses() {
-        let expenseListHTML = '';
-        let totalExpenses = 0;
-        expenses.forEach((expense, index) => {
-            expenseListHTML += `<li>${expense.name}: ${expense.amount} THB <button class="btn btn-danger btn-sm" onclick="deleteExpense(${index})">Delete</button> <button class="btn btn-warning btn-sm" onclick="editExpense(${index})">Edit</button></li>`;
-            totalExpenses += expense.amount;
-        });
-        $('#expenseList').html(expenseListHTML);
-        localStorage.setItem('totalExpenses', totalExpenses);
-        calculateDailyBudget();
-    }
-
+    // Delete Monthly Expense
     function deleteExpense(index) {
-        expenses.splice(index, 1);
-        localStorage.setItem('expenses', JSON.stringify(expenses));
-        displayExpenses();
+      monthlyExpenses.splice(index, 1);
+      updateExpenseList();
     }
 
-    function editExpense(index) {
-        const expense = expenses[index];
-        $('#expenseName').val(expense.name);
-        $('#expenseAmount').val(expense.amount);
-        $('#saveExpense').off('click').click(function() {
-            expense.name = $('#expenseName').val();
-            expense.amount = parseInt($('#expenseAmount').val());
-            localStorage.setItem('expenses', JSON.stringify(expenses));
-            displayExpenses();
-            $('#expenseModal').modal('hide');
-        });
-        $('#expenseModal').modal('show');
+    // Update Remaining Money and Money Available per Day
+    function updateRemainingMoney(totalMonthlyExpense = 0) {
+      const totalExpense = monthlyExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+      const remainingMoney = monthlyIncome - totalExpense;
+      const moneyPerDay = remainingMoney / 30; // Assuming 30 days in a month
+
+      document.getElementById('remainingMoney').textContent = remainingMoney.toFixed(2);
+      document.getElementById('moneyPerDay').textContent = moneyPerDay.toFixed(2);
     }
 
-    // Calculate Daily Budget
-    function calculateDailyBudget() {
-        const totalExpenses = parseInt(localStorage.getItem('totalExpenses')) || 0;
-        const remaining = monthlyIncome - totalExpenses;
-        dailyLimit = remaining / 30;
-        $('#dailyBudget').text(dailyLimit.toFixed(2));
+    // Update Today's Expenses List
+    function updateDailyExpenses() {
+      let totalDailyExpense = 0;
+
+      dailyExpenses.forEach(expense => {
+        totalDailyExpense += expense.amount;
+      });
+
+      document.getElementById('yearlySummary').textContent = `Total Remaining: ${monthlyIncome - totalDailyExpense}`;
     }
 
-    // Daily Expenses Logic
-    $('#saveDailyExpense').click(function () {
-        const expenseName = $('#dailyExpenseName').val();
-        const expenseAmount = parseInt($('#dailyExpenseAmount').val());
-        if (expenseName && expenseAmount) {
-            dailyExpenses.push({ name: expenseName, amount: expenseAmount });
-            localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses));
-            updateDailyExpenseChart();
-            $('#dailyExpenseModal').modal('hide');
+    // Update Expense Chart
+    function updateExpenseChart() {
+      const ctx = document.getElementById('expenseChart').getContext('2d');
+      const labels = dailyExpenses.map(exp => exp.name);
+      const data = dailyExpenses.map(exp => exp.amount);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Daily Expenses',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
         }
-    });
-
-    function updateDailyExpenseChart() {
-        const dailyExpenseData = dailyExpenses.map(expense => expense.amount);
-        const dailyExpenseLabels = dailyExpenses.map(expense => expense.name);
-        
-        const ctx = document.getElementById('expensesChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: dailyExpenseLabels,
-                datasets: [{
-                    label: 'Daily Expenses',
-                    data: dailyExpenseData,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+      });
     }
-</script>
-
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  </script>
 </body>
 </html>
