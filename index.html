@@ -171,7 +171,7 @@
         let expenseListHTML = '';
         let totalExpenses = 0;
         expenses.forEach((expense, index) => {
-            expenseListHTML += `<li>${expense.name}: ${expense.amount} THB <button class="btn btn-danger btn-sm" onclick="deleteExpense(${index})">Delete</button></li>`;
+            expenseListHTML += `<li>${expense.name}: ${expense.amount} THB <button class="btn btn-danger btn-sm" onclick="deleteExpense(${index})">Delete</button> <button class="btn btn-warning btn-sm" onclick="editExpense(${index})">Edit</button></li>`;
             totalExpenses += expense.amount;
         });
         $('#expenseList').html(expenseListHTML);
@@ -185,6 +185,20 @@
         displayExpenses();
     }
 
+    function editExpense(index) {
+        const expense = expenses[index];
+        $('#expenseName').val(expense.name);
+        $('#expenseAmount').val(expense.amount);
+        $('#saveExpense').off('click').click(function() {
+            expense.name = $('#expenseName').val();
+            expense.amount = parseInt($('#expenseAmount').val());
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            displayExpenses();
+            $('#expenseModal').modal('hide');
+        });
+        $('#expenseModal').modal('show');
+    }
+
     // Calculate Daily Budget
     function calculateDailyBudget() {
         const totalExpenses = parseInt(localStorage.getItem('totalExpenses')) || 0;
@@ -195,49 +209,4 @@
 
     // Daily Expenses Logic
     $('#saveDailyExpense').click(function () {
-        const expenseName = $('#dailyExpenseName').val();
-        const expenseAmount = parseInt($('#dailyExpenseAmount').val());
-        if (expenseName && expenseAmount) {
-            const status = expenseAmount > dailyLimit ? 'Over Budget' : 'OK';
-            dailyExpenses.push({ name: expenseName, amount: expenseAmount, status: status });
-            localStorage.setItem('dailyExpenses', JSON.stringify(dailyExpenses));
-            updateDailyExpenseChart();
-            $('#dailyExpenseModal').modal('hide');
-        }
-    });
-
-    function updateDailyExpenseChart() {
-        const ctx = document.getElementById('expensesChart').getContext('2d');
-        const dates = [];
-        const amounts = [];
-        dailyExpenses.forEach((expense) => {
-            dates.push(expense.name);
-            amounts.push(expense.amount);
-        });
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: 'Daily Expenses',
-                    data: amounts,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-</script>
-
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        const expense
