@@ -38,6 +38,14 @@
         .status-warning {
             color: red;
         }
+        .daily-expense-list {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        .daily-expense-item {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -77,7 +85,15 @@
     <div class="card mt-3">
         <div class="card-header"><i class="fas fa-list"></i> Daily Spending History</div>
         <div class="card-body">
-            <ul id="dailyExpenseList" class="list-group"></ul>
+            <div class="daily-expense-list" id="dailyExpenseList"></div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card mt-3">
+        <div class="card-header"><i class="fas fa-chart-line"></i> Daily Spending Chart</div>
+        <div class="card-body">
+            <canvas id="dailyChart"></canvas>
         </div>
     </div>
 </div>
@@ -213,28 +229,67 @@ function updateDailyExpenseList() {
     const dailyExpenseListElement = document.getElementById("dailyExpenseList");
     dailyExpenseListElement.innerHTML = "";
     dailyExpenses.forEach((expense) => {
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
-        li.innerHTML = `${expense.date}: ${expense.name} - ${expense.amount.toFixed(2)} THB 
-            <span class="status-warning">${expense.status}</span>`;
+        const li = document.createElement("div");
+        li.className = "daily-expense-item list-group-item d-flex justify-content-between align-items-center";
+        li.innerHTML = `${expense.date} - ${expense.name}: ${expense.amount.toFixed(2)} THB 
+            <span class="badge bg-${expense.status === "Exceeds limit" ? "danger" : "success"}">${expense.status}</span>`;
+        li.onclick = function() { displayDailyExpenseDetails(expense); };
         dailyExpenseListElement.appendChild(li);
     });
+
+    updateChart();
 }
 
-// Calculate total daily spent
+// Display daily expense details
+function displayDailyExpenseDetails(expense) {
+    alert(`Date: ${expense.date}\nExpense: ${expense.name}\nAmount: ${expense.amount.toFixed(2)} THB\nStatus: ${expense.status}`);
+}
+
+// Calculate total money spent today
 function calculateDailySpent() {
-    const dailySpent = dailyExpenses.reduce((total, expense) => total + expense.amount, 0);
-    document.getElementById("dailySpent").innerHTML = dailySpent.toFixed(2);
+    const today = new Date().toISOString().split('T')[0];
+    let dailySpent = dailyExpenses.filter(exp => exp.date === today).reduce((total, exp) => total + exp.amount, 0);
+    document.getElementById("dailySpent").innerText = dailySpent.toFixed(2);
 }
 
-// Load data and initialize
-window.onload = function() {
-    updateExpenseList();
-    updateDailyExpenseList();
-    calculateTotalExpenses();
-    calculateBudget();
+// Chart setup
+let dailyChart = new Chart(document.getElementById('dailyChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: [], // Date labels
+        datasets: [{
+            label: 'Daily Spending (THB)',
+            data: [], // Spending data
+            backgroundColor: 'rgba(0, 123, 255, 0.7)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: { title: { display: true, text: 'Date' } },
+            y: { title: { display: true, text: 'Spending (THB)' }, beginAtZero: true }
+        }
+    }
+});
+
+// Update the daily spending chart
+function updateChart() {
+    let dates = [...new Set(dailyExpenses.map(exp => exp.date))]; // Get unique dates
+    let spendingPerDay = dates.map(date => {
+        return dailyExpenses.filter(exp => exp.date === date).reduce((total, exp) => total + exp.amount, 0);
+    });
+
+    dailyChart.data.labels = dates;
+    dailyChart.data.datasets[0].data = spendingPerDay;
+    dailyChart.update();
 }
+
+// Initial setup
+updateExpenseList();
+updateDailyExpenseList();
+calculateBudget();
 </script>
-
 </body>
 </html>
