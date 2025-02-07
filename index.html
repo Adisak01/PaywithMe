@@ -10,19 +10,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
+            background-color: #f8f9fa;
             padding-top: 50px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn {
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
         }
 
         .modal-content {
             padding: 20px;
         }
 
-        .btn {
-            margin: 5px;
-        }
-
         .card {
             margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
         }
 
         .chart-container {
@@ -30,12 +52,90 @@
             height: 400px;
             width: 100%;
         }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .list-group-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .float-right {
+            cursor: pointer;
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        h2, h4 {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .icon-btn {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .overview {
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .overview p {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .overview p span {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            border-radius: 50%;
+            padding: 15px;
+            color: white;
+            font-size: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        .fab i {
+            margin: 0;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h2>Expense Tracker</h2>
+        <h2 class="text-center">Expense Tracker</h2>
 
         <!-- Monthly Income Section -->
         <div class="mb-4">
@@ -45,20 +145,20 @@
 
         <!-- Monthly Expenses Section -->
         <h4>Monthly Expenses</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseModal">Add Expense</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseModal"><i class="fas fa-plus-circle"></i> Add Expense</button>
         <ul id="expenseList" class="list-group mt-3"></ul>
 
         <!-- Today's Expenses Section -->
         <h4 class="mt-5">Today's Expenses</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTodayExpenseModal">Add Today's Expense</button>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTodayExpenseModal"><i class="fas fa-plus-circle"></i> Add Today's Expense</button>
         <ul id="todayExpenseList" class="list-group mt-3"></ul>
 
-        <!-- Total Summary -->
-        <h4 class="mt-5">Summary</h4>
-        <p>Total Expenses: <span id="totalExpenses">0</span></p>
-        <p>Remaining Monthly Budget: <span id="remainingMonthlyBudget">0</span></p>
-        <p>Money Available per Day: <span id="dailyBudget">0</span></p>
-        <p>Yearly Summary: <span id="yearlySummary">0</span></p>
+        <!-- Total Summary Section -->
+        <div class="overview">
+            <p>Total Expenses: <span id="totalExpenses">0</span></p>
+            <p>Remaining Monthly Budget: <span id="remainingMonthlyBudget">0</span></p>
+            <p>Money Available per Day: <span id="dailyBudget">0</span></p>
+        </div>
 
         <!-- Clear Data Button -->
         <button class="btn btn-danger mt-3" onclick="clearLocalStorage()">Clear All Data</button>
@@ -114,6 +214,11 @@
         </div>
     </div>
 
+    <!-- Floating Action Button -->
+    <div class="fab" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+        <i class="fas fa-plus"></i>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Initialize data from localStorage
@@ -121,13 +226,15 @@
         let todayExpenses = JSON.parse(localStorage.getItem('todayExpenses')) || [];
         let monthlyIncome = localStorage.getItem('monthlyIncome') || 0;
 
-        // Set initial value for Monthly Income input
-        document.getElementById('monthlyIncome').value = monthlyIncome;
-
-        // Update monthly expense list
-        updateExpenseList();
-        updateTodayExpenseList();
-        updateRemainingMoney();
+        // Update DOM on load
+        window.onload = function () {
+            document.getElementById('monthlyIncome').value = monthlyIncome;
+            updateExpenseList();
+            updateTodayExpenseList();
+            updateRemainingMoney();
+            updateDailyBudget();
+            renderChart();
+        }
 
         // Add Monthly Expense
         function addMonthlyExpense() {
@@ -137,9 +244,8 @@
                 monthlyExpenses.push({ name, amount });
                 localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
                 updateExpenseList();
-                document.getElementById('expenseName').value = '';
-                document.getElementById('expenseAmount').value = '';
-                $('#addExpenseModal').modal('hide');
+                updateRemainingMoney();
+                updateDailyBudget();
             }
         }
 
@@ -151,51 +257,45 @@
                 todayExpenses.push({ name, amount, date: new Date().toLocaleDateString() });
                 localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
                 updateTodayExpenseList();
-                document.getElementById('todayExpenseName').value = '';
-                document.getElementById('todayExpenseAmount').value = '';
-                $('#addTodayExpenseModal').modal('hide');
+                updateRemainingMoney();
+                updateDailyBudget();
+                renderChart();
             }
         }
 
-        // Update Monthly Expenses List
+        // Update Expense List
         function updateExpenseList() {
             const expenseList = document.getElementById('expenseList');
             expenseList.innerHTML = '';
-            let totalExpenses = 0;
             monthlyExpenses.forEach((expense, index) => {
-                totalExpenses += expense.amount;
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
-                li.innerHTML = `${expense.name}: ${expense.amount} 
-                <button class="btn btn-danger btn-sm float-right" onclick="deleteMonthlyExpense(${index})">
-                    <i class="fas fa-trash"></i>
-                </button>`;
+                li.innerHTML = `${expense.name}: ฿${expense.amount.toFixed(2)} 
+                <button class="btn btn-danger btn-sm float-right" onclick="deleteExpense(${index})"><i class="fas fa-trash"></i></button>`;
                 expenseList.appendChild(li);
             });
-            document.getElementById('totalExpenses').textContent = totalExpenses;
-            updateRemainingMoney();
         }
 
-        // Update Today's Expenses List
+        // Update Today's Expense List
         function updateTodayExpenseList() {
             const todayExpenseList = document.getElementById('todayExpenseList');
             todayExpenseList.innerHTML = '';
             todayExpenses.forEach((expense, index) => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
-                li.innerHTML = `${expense.name}: ${expense.amount} (Date: ${expense.date}) 
-                <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})">
-                    <i class="fas fa-trash"></i>
-                </button>`;
+                li.innerHTML = `${expense.date} - ${expense.name}: ฿${expense.amount.toFixed(2)}
+                <button class="btn btn-danger btn-sm float-right" onclick="deleteTodayExpense(${index})"><i class="fas fa-trash"></i></button>`;
                 todayExpenseList.appendChild(li);
             });
         }
 
         // Delete Monthly Expense
-        function deleteMonthlyExpense(index) {
+        function deleteExpense(index) {
             monthlyExpenses.splice(index, 1);
             localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
             updateExpenseList();
+            updateRemainingMoney();
+            updateDailyBudget();
         }
 
         // Delete Today's Expense
@@ -203,6 +303,8 @@
             todayExpenses.splice(index, 1);
             localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
             updateTodayExpenseList();
+            updateRemainingMoney();
+            updateDailyBudget();
         }
 
         // Update Remaining Money
@@ -222,6 +324,39 @@
             document.getElementById('dailyBudget').textContent = dailyBudget.toFixed(2);
         }
 
+        // Render Chart.js Graph
+        function renderChart() {
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            const expenseChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: todayExpenses.map(exp => exp.date),
+                    datasets: [{
+                        label: 'Expenses Today',
+                        data: todayExpenses.map(exp => exp.amount),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                    }, {
+                        label: 'Daily Budget Limit',
+                        data: todayExpenses.map(() => parseFloat(document.getElementById('dailyBudget').textContent)),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Expense Tracking Over Time'
+                        }
+                    }
+                }
+            });
+        }
+
         // Clear Local Storage
         function clearLocalStorage() {
             if (confirm("Are you sure you want to clear all data?")) {
@@ -232,33 +367,9 @@
                 updateTodayExpenseList();
                 updateRemainingMoney();
                 updateDailyBudget();
+                renderChart();
             }
         }
-
-        // Chart.js for Expenses
-        const ctx = document.getElementById('expenseChart').getContext('2d');
-        const expenseChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: todayExpenses.map(exp => exp.date),
-                datasets: [{
-                    label: 'Expenses Today',
-                    data: todayExpenses.map(exp => exp.amount),
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    fill: true,
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Expense Tracking Over Time'
-                    }
-                }
-            }
-        });
     </script>
 </body>
 
