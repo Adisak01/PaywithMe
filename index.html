@@ -150,6 +150,7 @@
         const dailyLimit = 100;  // Set daily spending limit
         let totalExpenses = 0;
 
+        // Function to update the expense list
         function updateExpenseList() {
             const expenseList = document.getElementById('expenseList');
             expenseList.innerHTML = '';
@@ -168,6 +169,7 @@
             updateDailyBudget();
         }
 
+        // Function to update today's expense list
         function updateTodayExpenseList() {
             const todayExpenseList = document.getElementById('todayExpenseList');
             todayExpenseList.innerHTML = '';
@@ -183,6 +185,7 @@
             });
         }
 
+        // Function to update the remaining money
         function updateRemainingMoney() {
             const remainingMoney = monthlyIncome - totalExpenses;
             document.getElementById('remainingMoney').textContent = remainingMoney;
@@ -193,6 +196,7 @@
             updateChart();
         }
 
+        // Function to update the daily expenses chart
         function updateChart() {
             const ctx = document.getElementById('dailyExpensesChart').getContext('2d');
             const dailyExpensesTotal = todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -231,6 +235,7 @@
             });
         }
 
+        // Function to save monthly expense
         document.getElementById('saveExpense').addEventListener('click', function() {
             const expenseName = document.getElementById('expenseName').value;
             const expenseAmount = parseFloat(document.getElementById('expenseAmount').value);
@@ -242,6 +247,7 @@
             }
         });
 
+        // Function to save today's expense
         document.getElementById('saveTodayExpense').addEventListener('click', function() {
             const todayExpenseName = document.getElementById('todayExpenseName').value;
             const todayExpenseAmount = parseFloat(document.getElementById('todayExpenseAmount').value);
@@ -254,17 +260,32 @@
             }
         });
 
+        // Function to delete monthly expense
         function deleteMonthlyExpense(index) {
             monthlyExpenses.splice(index, 1);
             localStorage.setItem('monthlyExpenses', JSON.stringify(monthlyExpenses));
             updateExpenseList();
         }
 
+        // Function to delete today's expense
         function deleteTodayExpense(index) {
             todayExpenses.splice(index, 1);
             localStorage.setItem('todayExpenses', JSON.stringify(todayExpenses));
             updateTodayExpenseList();
         }
+
+        // Load saved data when the page loads
+        window.onload = function() {
+            const savedIncome = localStorage.getItem('monthlyIncome');
+            if (savedIncome) {
+                monthlyIncome = parseFloat(savedIncome);
+                document.getElementById('monthlyIncome').value = monthlyIncome;
+                updateRemainingMoney();
+            }
+
+            updateExpenseList();
+            updateTodayExpenseList();
+        };
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
